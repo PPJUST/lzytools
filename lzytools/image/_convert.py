@@ -1,0 +1,54 @@
+import io
+
+import cv2
+import numpy
+from PIL import Image
+
+
+def bytes_to_numpy(bytes_image: bytes) -> numpy.ndarray:
+    """将bytes图片对象转换为numpy图片对象
+    :param bytes_image: bytes图片对象
+    :return: numpy图片对象"""
+    bytesio_image = io.BytesIO(bytes_image)  # 转为BytesIO对象
+    pil_image = Image.open(bytesio_image)  # 转PIL.Image
+    numpy_image = numpy.array(pil_image)  # 转NumPy数组
+
+    return numpy_image
+
+
+def numpy_to_bytes(numpy_image: numpy.ndarray) -> bytes:
+    """将numpy图片对象转换为bytes图片对象
+    :param numpy_image: numpy图片对象
+    :return: bytes图片对象"""
+    image = Image.fromarray(numpy_image)  # 换为PIL Image对象
+    bytes_image = io.BytesIO()  # 转为BytesIO对象
+    image.save(bytes_image, format=image.format)
+    bytes_image = bytes_image.getvalue()
+
+    return bytes_image
+
+
+def resize_image_numpy(image: numpy.ndarray, width: int, height: int) -> numpy.ndarray:
+    """缩放numpy图片对象至指定宽高
+    :param image: numpy图片对象
+    :param width: int，新的宽度
+    :param height: int，新的高度"""
+    image_ = cv2.resize(image, dsize=(width, height))
+    return image_
+
+
+def resize_image_numpy_ratio(image: numpy.ndarray, ratio: float) -> numpy.ndarray:
+    """按比例缩放numpy图片对象
+    :param image: numpy图片对象
+    :param ratio: float，缩放比例（>0）"""
+    width, height = image.size
+    new_width = int(width * ratio)
+    new_height = int(height * ratio)
+    image_ = cv2.resize(image, dsize=(new_width, new_height))
+    return image_
+
+
+def rgb_to_gray_numpy(image: numpy.ndarray) -> numpy.ndarray:
+    """将numpy图片对象转为灰度图"""
+    image_ = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return image_
