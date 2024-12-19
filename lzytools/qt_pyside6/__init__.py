@@ -5,6 +5,7 @@ from ._label import *
 from ._lineEdit import *
 from ._listWidget import *
 from ._mainWindow import *
+from ._scrollArea import *
 from ._slider import *
 from ._styledItemDelegate import *
 from ._tableWidget import *
