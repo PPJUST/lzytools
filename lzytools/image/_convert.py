@@ -1,3 +1,4 @@
+import base64
 import io
 
 import cv2
@@ -52,3 +53,13 @@ def rgb_to_gray_numpy(image: numpy.ndarray) -> numpy.ndarray:
     """将numpy图片对象转为灰度图"""
     image_ = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return image_
+
+
+def image_to_base64(image_path: str) -> str:
+    """本地图片转为base64图片
+    :param image_path: str，本地图片路径
+    :return: bytes，base64字符串"""
+    with open(image_path, "rb") as image_file:
+        image_data = image_file.read()
+        base64_str = base64.b64encode(image_data).decode('utf-8')
+    return base64_str

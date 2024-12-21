@@ -1,3 +1,6 @@
+import base64
+from typing import Union
+
 from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
@@ -36,3 +39,18 @@ def calculate_keep_aspect_ratio_resize(qsize_widget: QSize, qsize_pic: QSize) ->
     """
 
     return resize_qsize
+
+
+def base64_to_pixmap(image_base64: Union[bytes, str]) -> QPixmap:
+    """base64图片转为pixmap对象
+    :param image_base64: base64字节或字符串
+    :return: QPixmap"""
+    if isinstance(image_base64, str):
+        image_base64 = base64.b64decode(image_base64)
+
+    pixmap = QPixmap()
+    buffer = QBuffer(QByteArray(image_base64))
+    buffer.open(QBuffer.ReadOnly)
+    pixmap.loadFromData(buffer.data())
+
+    return pixmap
