@@ -45,12 +45,14 @@ def base64_to_pixmap(image_base64: Union[bytes, str]) -> QPixmap:
     """base64图片转为pixmap对象
     :param image_base64: base64字节或字符串
     :return: QPixmap"""
-    if isinstance(image_base64, str):
-        image_base64 = base64.b64decode(image_base64)
+    # 解码base64字节或字符串
+    byte_data = base64.b64decode(image_base64)
 
+    # 将字节数据转换为QPixmap
     pixmap = QPixmap()
-    buffer = QBuffer(QByteArray(image_base64))
-    buffer.open(QBuffer.ReadOnly)
-    pixmap.loadFromData(buffer.data())
+    buffer = QByteArray(byte_data)
+    byte_array_device = QBuffer(buffer)
+    byte_array_device.open(QBuffer.ReadOnly)
+    pixmap.loadFromData(byte_array_device.data())
 
     return pixmap
