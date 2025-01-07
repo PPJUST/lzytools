@@ -2,7 +2,7 @@ import re
 import subprocess
 from typing import Tuple
 
-from lzytools.general import send_data_to_socket
+from lzytools.common import send_data_to_socket
 
 """
 | Code | Meaning                         | 翻译                                               |

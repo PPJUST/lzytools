@@ -2,6 +2,15 @@ import os
 from typing import Union
 
 
+def dedup_list(lst: list) -> list:
+    """"剔除列表中的重复项"""
+    list_dedup = []
+    for i in lst:
+        if i not in list_dedup:
+            list_dedup.append(i)
+    return list_dedup
+
+
 def merge_intersection_item(items: Union[list, tuple, set]) -> list:
     """合并有交集的集合/列表/元组 [(1,2),{2,3},(5,6)]->[(1,2,3),(5,6)]
     :return: 示例 [(1,2),{2,3},(5,6)]->[(1,2,3),(5,6)]"""

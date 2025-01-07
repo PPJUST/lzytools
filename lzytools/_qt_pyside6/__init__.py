@@ -1,3 +1,4 @@
+# Pyside6的参考示例
 from ._button import *
 from ._dialog import *
 from ._function import *

@@ -8,7 +8,7 @@ import send2trash
 from ._filename import create_nodup_filename_standard_digital_suffix
 from ._filepath import split_path
 from ._info import get_first_multi_file_dirpath
-from ..general import create_random_string
+from ..common import create_random_string
 
 
 def delete(path: str, send_to_trash: bool = False) -> bool:
