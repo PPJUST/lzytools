@@ -1,3 +1,4 @@
+import os.path
 import re
 from typing import Union
 
@@ -8,15 +9,14 @@ _PATTERN_RAR_WITHOUT_SUFFIX = r'^(.+)\.part(\d+)$'  # rar分卷文件无后缀�
 _PATTERN_ZIP = r'^(.+)\.zip$'  # zip分卷文件的第一个分卷包一般都是.zip后缀，所以.zip后缀直接视为分卷压缩文件 test.zip
 _PATTERN_ZIP_VOLUME = r'^(.+)\.z\d+$'  # test.zip/test.z01/test.z02
 _PATTERN_ZIP_TYPE2 = r'^(.+)\.zip\.\d+$'  # test.zip.001/test.zip.002/test.zip.003
+_PATTERN_JOINED = [_PATTERN_7Z, _PATTERN_RAR, _PATTERN_RAR_WITHOUT_SUFFIX, _PATTERN_ZIP, _PATTERN_ZIP_VOLUME,
+                   _PATTERN_ZIP_TYPE2]
 
 
 def is_volume_archive_by_filename(filename: str) -> bool:
     """通过文件名判断是否为分卷压缩文件
     :param filename: str，文件名（包含文件扩展名）"""
-    pattern_joined = [_PATTERN_7Z, _PATTERN_RAR, _PATTERN_RAR_WITHOUT_SUFFIX,
-                      _PATTERN_ZIP, _PATTERN_ZIP_VOLUME, _PATTERN_ZIP_TYPE2]
-
-    for pattern in pattern_joined:
+    for pattern in _PATTERN_JOINED:
         if re.match(pattern, filename, flags=re.I):
             return True
 
@@ -59,3 +59,16 @@ def guess_first_volume_archive_filename(filename: str) -> Union[str, bool]:
         guess_filename = f'{filetitle}.zip.001'
 
     return guess_filename
+
+
+def get_filetitle(filename: str) -> str:
+    """根据传入的文件名，提取其不含文件扩展名的文件标题
+    :param filename: str，文件名（包含文件扩展名）
+    :return: 不含文件扩展名的文件标题"""
+    if not is_volume_archive_by_filename(filename):
+        return os.path.basename(filename)
+
+    for pattern in _PATTERN_JOINED:
+        filetitle = re.match(pattern, filename, flags=re.I).group(1)
+        if filetitle:
+            return filetitle
