@@ -56,3 +56,14 @@ def base64_to_pixmap(image_base64: Union[bytes, str]) -> QPixmap:
     pixmap.loadFromData(byte_array_device.data())
 
     return pixmap
+
+
+def bytes_to_pixmap(image_bytes: bytes) -> QPixmap:
+    """bytes图片转为pixmap对象
+    :param image_bytes: bytes图片对象
+    :return: QPixmap"""
+    image = QImage()
+    image.loadFromData(image_bytes)
+    pixmap = QPixmap.fromImage(image)
+
+    return pixmap

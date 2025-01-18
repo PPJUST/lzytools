@@ -11,19 +11,19 @@ class LabelImageAutoSize(QLabel):
         super().__init__()
         self.setAlignment(Qt.AlignCenter)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.pixmap = None
+        self.pixmap_original = None
         if image_path:
-            self.pixmap = QPixmap(image_path)
+            self.pixmap_original = QPixmap(image_path)
 
     def set_image(self, image_path: str = None):
         """设置图片"""
-        self.pixmap = QPixmap(image_path)
+        self.pixmap_original = QPixmap(image_path)
         self.update_image_size()
 
     def update_image_size(self):
         """更新图片尺寸"""
-        if not self.pixmap.isNull():
-            scaled_pixmap = self.pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        if self.pixmap_original and not self.pixmap_original.isNull():
+            scaled_pixmap = self.pixmap_original.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.setPixmap(scaled_pixmap)
 
     def resizeEvent(self, event):
