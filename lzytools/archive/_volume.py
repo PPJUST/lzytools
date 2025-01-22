@@ -69,6 +69,7 @@ def get_filetitle(filename: str) -> str:
         return os.path.basename(filename)
 
     for pattern in _PATTERN_JOINED:
-        filetitle = re.match(pattern, filename, flags=re.I).group(1)
-        if filetitle:
-            return filetitle
+        if re.match(pattern, filename, flags=re.I):
+            filetitle = re.match(pattern, filename, flags=re.I).group(1)
+            if filetitle:
+                return filetitle
