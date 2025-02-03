@@ -37,6 +37,7 @@ class ScrollAreaSmooth(QScrollArea):
 class ScrollBarSmooth(QScrollBar):
     """实现平滑滚动的滚动条（在起点终点之间插值）"""
     MoveEvent = Signal(name='移动信号')
+    MoveFinished = Signal(name='结束移动信号')
     AutoPlayStart = Signal(name='开始自动滚动')
     AutoPlayStop = Signal(name='停止自动滚动')
 
@@ -48,6 +49,7 @@ class ScrollBarSmooth(QScrollBar):
         self.animal_smooth.setPropertyName(b"value")
         self.animal_smooth.setEasingCurve(QEasingCurve.OutQuad)  # 二次缓出
         self.animal_smooth.setDuration(400)  # 动画时间 毫秒
+        self.animal_smooth.finished.connect(self.MoveFinished.emit)
 
         # 设置线性动画（仅用于自动滚动）
         self.animal_linear = QPropertyAnimation()
