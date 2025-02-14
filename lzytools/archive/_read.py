@@ -21,7 +21,7 @@ def read_archive(archive_path: str) -> Union[zipfile.ZipFile, rarfile.RarFile, b
     return archive
 
 
-def get_infolist(archive_path: str) -> list:
+def get_infolist(archive_path: str) -> list[zipfile.ZipInfo]:
     """获取压缩文件的内部信息list（仅支持zip和rar）
     :param archive_path: str，压缩文件路径
     :return: list，zipfile/rarfile库读取的压缩文件的infolist"""
