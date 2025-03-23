@@ -47,6 +47,3 @@ def remove_subpaths(paths: list):
             subpaths.append(path)
 
     return [i for i in paths if i not in subpaths]
-
-
-print(remove_subpaths(os.listdir(r'E:\Download\乒乓球')))
