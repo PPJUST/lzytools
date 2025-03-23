@@ -1,5 +1,9 @@
 import os
 
+import natsort
+
+from lzytools.file._info import get_parent_dirpaths
+
 
 def split_path(path: str):
     """拆分路径为父目录路径，文件名（不含文件扩展名），文件扩展名
@@ -27,3 +31,22 @@ def reverse_path(path: str) -> str:
     path_reversed = ' \\ '.join(_split_path[::-1])
     path_reversed = os.path.normpath(path_reversed)
     return path_reversed
+
+
+def remove_subpaths(paths: list):
+    """剔除传入路径中的子路径"""
+    paths = [os.path.normpath(path) for path in paths]
+    paths = natsort.os_sorted(paths)  # 排序路径
+    subpaths = []
+    for path in paths:
+        paths_split_parents = get_parent_dirpaths(path)
+        # 判断其父路径是否与原始列表存在交集，如果存在则说明其是子路径
+        _s1 = set(paths)
+        _s2 = set(paths_split_parents)
+        if _s1 & _s2:
+            subpaths.append(path)
+
+    return [i for i in paths if i not in subpaths]
+
+
+print(remove_subpaths(os.listdir(r'E:\Download\乒乓球')))

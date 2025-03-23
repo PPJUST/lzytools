@@ -1,7 +1,7 @@
 import re
 from typing import Union
 
-from ._check import is_dup_filename
+from lzytools.file._check import is_dup_filename
 
 # WINDOWS系统文件命名规则：文件和文件夹不能命名为“.”或“..”，也不能包含以下任何字符: \ / : * ? " < > |
 _ILLEGAL_CHARACTERS = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
