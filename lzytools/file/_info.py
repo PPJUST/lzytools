@@ -3,6 +3,9 @@ from typing import Union
 
 import filetype
 import win32com.client  # pywin32
+from natsort import natsort
+
+from lzytools.file._filepath import remove_subpaths
 
 
 def get_size(path: str):
@@ -16,6 +19,8 @@ def get_size(path: str):
         return get_dir_size(path)
     elif os.path.isfile(path):
         return os.path.getsize(path)
+    else:
+        return 0
 
 
 def get_dir_size(dirpath: str) -> int:
@@ -40,6 +45,24 @@ def get_files_in_dir(dirpath: str) -> list:
             filepath_join = os.path.normpath(os.path.join(_dirpath, filename))
             files.append(filepath_join)
 
+    return files
+
+
+def get_files_in_paths(paths: list) -> list:
+    """提取输入路径列表中所有文件路径"""
+    # 删除路径中的子路径
+    paths = remove_subpaths(paths)
+
+    # 提取路径中的文件
+    files = set()
+    for path in paths:
+        if os.path.isfile(path):
+            files.add(path)
+        elif os.path.isdir(path):
+            child_files = get_files_in_dir(path)
+            files.update(child_files)
+
+    files = natsort.os_sorted(files)
     return files
 
 
