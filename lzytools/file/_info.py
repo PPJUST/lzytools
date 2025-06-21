@@ -78,27 +78,6 @@ def get_folders_in_dir(dirpath: str) -> list:
     return folders
 
 
-def get_parent_dirpaths(path: str) -> list:
-    """获取一个路径的所有上级目录路径
-    :param path: str，文件/文件夹路径
-    :return: list，所有上级目录列表，层级高的在前面"""
-    parent_dirs = []
-
-    while True:
-        parent_dirpath, filename = os.path.split(path)
-        if filename:
-            parent_dirs.append(parent_dirpath)
-        else:
-            break
-
-        path = parent_dirpath
-
-    # 反转列表顺序，使得越上级目录排在越前面
-    parent_dirs = parent_dirs[::-1]
-
-    return parent_dirs
-
-
 def guess_filetype(path) -> Union[str, None]:
     """判断文件类型
     :param path: str，文件路径"""

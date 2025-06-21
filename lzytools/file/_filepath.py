@@ -2,8 +2,6 @@ import os
 
 import natsort
 
-from lzytools.file._info import get_parent_dirpaths
-
 
 def split_path(path: str):
     """拆分路径为父目录路径，文件名（不含文件扩展名），文件扩展名
@@ -47,3 +45,24 @@ def remove_subpaths(paths: list):
             subpaths.append(path)
 
     return [i for i in paths if i not in subpaths]
+
+
+def get_parent_dirpaths(path: str) -> list:
+    """获取一个路径的所有上级目录路径
+    :param path: str，文件/文件夹路径
+    :return: list，所有上级目录列表，层级高的在前面"""
+    parent_dirs = []
+
+    while True:
+        parent_dirpath, filename = os.path.split(path)
+        if filename:
+            parent_dirs.append(parent_dirpath)
+        else:
+            break
+
+        path = parent_dirpath
+
+    # 反转列表顺序，使得越上级目录排在越前面
+    parent_dirs = parent_dirs[::-1]
+
+    return parent_dirs
