@@ -71,7 +71,7 @@ def create_nodup_filename_standard_digital_suffix(filetitle: str, check_dirpath:
     :param check_dirpath: str，目标文件夹路径
     :return: str，非重复的文件名（包含文件扩展名）"""
     # 组合文件名
-    if filename_extension.strip():
+    if filename_extension and filename_extension.strip():
         filename = f'{filetitle}.{filename_extension.strip()}'  # 假设为文件的文件名
     else:
         filename = filetitle  # 假设为文件夹的文件名
@@ -114,7 +114,7 @@ def create_nodup_filename_custom_suffix(filetitle: str, check_dirpath: str, add_
     filetitle = remove_suffix(filetitle, add_suffix)
 
     # 组合文件名
-    if filename_extension.strip():
+    if filename_extension and filename_extension.strip():
         filename = f'{filetitle}.{filename_extension.strip()}'  # 假设为文件的文件名
     else:
         filename = filetitle  # 假设为文件夹的文件名
