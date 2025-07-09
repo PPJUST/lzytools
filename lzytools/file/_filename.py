@@ -65,46 +65,47 @@ def remove_suffix(filetitle: str, suffix: str = None) -> str:
 
 def create_nodup_filename_standard_digital_suffix(filetitle: str, check_dirpath: str,
                                                   filename_extension: str = None) -> str:
-    """生成指定路径对应的文件在目标文件夹中非重复的文件名（统一数字后缀的文件名，(1)（1）等后缀）
+    """生成文件名在目标文件夹中非重复的文件名（统一数字后缀的文件名，(1)（1）等后缀）
     :param filetitle: str，文件名（不包含文件扩展名）
     :param filename_extension: str，文件扩展名（如果检查的文件名是文件的文件名，则必须使用该参数）
     :param check_dirpath: str，目标文件夹路径
     :return: str，非重复的文件名（包含文件扩展名）"""
+    # 剔除后缀
+    filetitle = remove_suffix(filetitle)
+
+    # 标准化文件扩展名
+    if filename_extension:
+        filename_extension = filename_extension.strip().strip('.')
+
     # 组合文件名
-    if filename_extension and filename_extension.strip():
-        filename = f'{filetitle}.{filename_extension.strip()}'  # 假设为文件的文件名
+    if filename_extension:
+        filename = f'{filetitle}.{filename_extension}'  # 假设为文件的文件名
     else:
         filename = filetitle  # 假设为文件夹的文件名
 
-    # 剔除后缀
-    filetitle_filter = remove_suffix(filetitle)
+    # 检查重复文件名
+    if is_dup_filename(filename, check_dirpath):
+        # 生成无重复的文件名，按照Windows重复文件名规则，一直循环后缀编号累加，直到不存在重复文件名
+        count = 1
+        while True:
+            # 组合文件名
+            if filename_extension:
+                filename = f'{filetitle} ({count}).{filename_extension}'  # 假设为文件的文件名
+            else:
+                filename = f'{filetitle} ({count})'  # 假设为文件夹的文件名
 
-    if filetitle_filter == filetitle:
-        return filename
-    else:
-        # 检查重复文件名
-        if is_dup_filename(filename, check_dirpath):
-            # 生成无重复的文件名，按照Windows重复文件名规则，一直循环后缀编号累加，直到不存在重复文件名
-            count = 1
-            while True:
-                # 组合文件名
-                if filename_extension.strip():
-                    filename = f'{filetitle} ({count}).{filename_extension.strip()}'  # 假设为文件的文件名
-                else:
-                    filename = f'{filetitle} ({count})'  # 假设为文件夹的文件名
+            # 检查
+            if is_dup_filename(filename, check_dirpath):
+                count += 1
+            else:
+                break
 
-                # 检查
-                if is_dup_filename(filename, check_dirpath):
-                    count += 1
-                else:
-                    break
-
-        return filename
+    return filename
 
 
 def create_nodup_filename_custom_suffix(filetitle: str, check_dirpath: str, add_suffix: str,
                                         filename_extension: str = None) -> str:
-    """生成指定路径对应的文件在目标文件夹中非重复的文件名（可指定目标文件名）
+    """生成指定文件名在目标文件夹中非重复的文件名（可指定目标文件名）
     :param filetitle: str，文件名（不包含文件扩展名）
     :param filename_extension: str，文件扩展名（如果检查的文件名是文件的文件名，则必须使用该参数）
     :param check_dirpath: str，目标文件夹路径
@@ -113,9 +114,13 @@ def create_nodup_filename_custom_suffix(filetitle: str, check_dirpath: str, add_
     # 剔除原始后缀
     filetitle = remove_suffix(filetitle, add_suffix)
 
+    # 标准化文件扩展名
+    if filename_extension:
+        filename_extension = filename_extension.strip().strip('.')
+
     # 组合文件名
-    if filename_extension and filename_extension.strip():
-        filename = f'{filetitle}.{filename_extension.strip()}'  # 假设为文件的文件名
+    if filename_extension:
+        filename = f'{filetitle}.{filename_extension}'  # 假设为文件的文件名
     else:
         filename = filetitle  # 假设为文件夹的文件名
 
@@ -125,8 +130,8 @@ def create_nodup_filename_custom_suffix(filetitle: str, check_dirpath: str, add_
         count = 1
         while True:
             # 组合文件名
-            if filename_extension.strip():
-                filename = f'{filetitle}{add_suffix}{count}.{filename_extension.strip()}'  # 假设为文件的文件名
+            if filename_extension:
+                filename = f'{filetitle}{add_suffix}{count}.{filename_extension}'  # 假设为文件的文件名
             else:
                 filename = f'{filetitle}{add_suffix}{count}'  # 假设为文件夹的文件名
 
