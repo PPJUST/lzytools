@@ -9,8 +9,13 @@ _PATTERN_RAR_WITHOUT_SUFFIX = r'^(.+)\.part(\d+)$'  # rar分卷文件无后缀�
 _PATTERN_ZIP = r'^(.+)\.zip$'  # zip分卷文件的第一个分卷包一般都是.zip后缀，所以.zip后缀直接视为分卷压缩文件 test.zip
 _PATTERN_ZIP_VOLUME = r'^(.+)\.z\d+$'  # test.zip/test.z01/test.z02
 _PATTERN_ZIP_TYPE2 = r'^(.+)\.zip\.\d+$'  # test.zip.001/test.zip.002/test.zip.003
+_PATTERN_BZ2 = r'^(.+)\.bz2\.\d+$'  # test.bz2.001/test.bz2.002/test.bz2.003
+_PATTERN_GZ = r'^(.+)\.gz\.\d+$'  # test.gz.001/test.gz.002/test.gz.003
+_PATTERN_TAR = r'^(.+)\.tar\.\d+$'  # test.tar.001/test.tar.002/test.tar.003
+_PATTERN_WIM = r'^(.+)\.wim\.\d+$'  # test.wim.001/test.wim.002/test.wim.003
+_PATTERN_XZ = r'^(.+)\.xz\.\d+$'  # test.xz.001/test.xz.002/test.xz.003
 _PATTERN_JOINED = [_PATTERN_7Z, _PATTERN_RAR, _PATTERN_RAR_WITHOUT_SUFFIX, _PATTERN_ZIP, _PATTERN_ZIP_VOLUME,
-                   _PATTERN_ZIP_TYPE2]
+                   _PATTERN_ZIP_TYPE2, _PATTERN_BZ2, _PATTERN_GZ, _PATTERN_TAR, _PATTERN_WIM, _PATTERN_XZ]
 
 
 def is_volume_archive_by_filename(filename: str) -> bool:
@@ -57,6 +62,26 @@ def guess_first_volume_archive_filename(filename: str) -> Union[str, bool]:
     elif re.match(_PATTERN_ZIP_TYPE2, filename, flags=re.I):
         filetitle = re.match(_PATTERN_ZIP_TYPE2, filename, flags=re.I).group(1)
         guess_filename = f'{filetitle}.zip.001'
+    # test.bz2.001/test.bz2.002/test.bz2.003
+    elif re.match(_PATTERN_BZ2, filename, flags=re.I):
+        filetitle = re.match(_PATTERN_BZ2, filename, flags=re.I).group(1)
+        guess_filename = f'{filetitle}.bz2.001'
+    # test.gz.001/test.gz.002/test.gz.003
+    elif re.match(_PATTERN_GZ, filename, flags=re.I):
+        filetitle = re.match(_PATTERN_GZ, filename, flags=re.I).group(1)
+        guess_filename = f'{filetitle}.gz.001'
+    # test.tar.001/test.tar.002/test.tar.003
+    elif re.match(_PATTERN_TAR, filename, flags=re.I):
+        filetitle = re.match(_PATTERN_TAR, filename, flags=re.I).group(1)
+        guess_filename = f'{filetitle}.tar.001'
+    # test.wim.001/test.wim.002/test.wim.003
+    elif re.match(_PATTERN_WIM, filename, flags=re.I):
+        filetitle = re.match(_PATTERN_WIM, filename, flags=re.I).group(1)
+        guess_filename = f'{filetitle}.wim.001'
+    # test.xz.001/test.xz.002/test.xz.003
+    elif re.match(_PATTERN_XZ, filename, flags=re.I):
+        filetitle = re.match(_PATTERN_XZ, filename, flags=re.I).group(1)
+        guess_filename = f'{filetitle}.xz.001'
 
     return guess_filename
 
@@ -73,3 +98,5 @@ def get_filetitle(filename: str) -> str:
             filetitle = re.match(pattern, filename, flags=re.I).group(1)
             if filetitle:
                 return filetitle
+
+    return os.path.basename(filename)  # 兜底
