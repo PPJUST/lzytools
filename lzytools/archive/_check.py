@@ -12,7 +12,7 @@ def is_archive_by_filename(filename: str) -> bool:
     _archive_file_extension = ['zip', 'rar', '7z', 'tar', 'gz', 'xz', 'iso']
 
     #  提取文件后缀名（不带.），判断一般的压缩文件
-    file_extension = os.path.splitext(filename)[1].strip()
+    file_extension = os.path.splitext(filename)[1].strip().strip('.').strip()
     if file_extension.lower() in _archive_file_extension:
         return True
 
