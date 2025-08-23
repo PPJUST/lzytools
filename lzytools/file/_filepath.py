@@ -66,3 +66,14 @@ def get_parent_dirpaths(path: str) -> list:
     parent_dirs = parent_dirs[::-1]
 
     return parent_dirs
+
+
+def is_subpath(parent_path: str, child_path: str) -> bool:
+    """判断child_path是否是parent_path的子路径"""
+    # 获取绝对路径并规范化
+    parent = os.path.abspath(os.path.normpath(parent_path))
+    child = os.path.abspath(os.path.normpath(child_path))
+
+    # 比较公共前缀
+    common_prefix = os.path.commonpath([parent, child])
+    return common_prefix == parent
