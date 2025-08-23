@@ -91,7 +91,7 @@ def get_filetitle(filename: str) -> str:
     :param filename: str，文件名（包含文件扩展名）
     :return: 不含文件扩展名的文件标题"""
     if not is_volume_archive_by_filename(filename):
-        return os.path.basename(filename)
+        return os.path.splitext(filename)[0]
 
     for pattern in _PATTERN_JOINED:
         if re.match(pattern, filename, flags=re.I):
