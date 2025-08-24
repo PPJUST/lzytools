@@ -25,19 +25,39 @@ class TabelWidgetHiddenOverLengthText(QTableWidget):
         # 设置文本单元格
         self.item_filename = QTableWidgetItem('')
         self.setItem(0, 0, self.item_filename)
-        # 禁止编辑单元格
-        self.item_filename.setFlags(self.item_filename.flags() & ~Qt.ItemIsEditable)
+        # 禁止编辑
+        self.setEditTriggers(QTableWidget.NoEditTriggers)
+        # 禁止选择
+        self.setSelectionMode(QTableWidget.NoSelection)
+        # 禁止获取焦点
+        self.setFocusPolicy(Qt.NoFocus)
+        # 设置样式表
+        self.setStyleSheet("""
+            QTableWidget {
+                border: 0px;
+                background: transparent;
+                gridline-color: transparent;
+                selection-background-color: transparent;
+            }
+
+            QTableWidget::item {
+                border: 0px;
+                padding: 0px;
+            }
+
+            QHeaderView::section {
+                border: 0px;
+                background: transparent;
+                padding: 0px;
+            }
+        """)
 
     def set_text(self, text: str):
         """设置文本"""
         self.item_filename.setText(text)
 
-    def set_tooltip(self, tool_tip: str):
-        """设置控件提示"""
-        self.item_filename.setToolTip(tool_tip)
-
     def set_height(self, height: int):
         """设置控件高度
         :param height: int，高度"""
-        self.setFixedHeight(height + 2)  # 控件高度
-        self.setRowHeight(0, height)  # 单元格行高
+        self.setFixedHeight(height)  # 控件高度
+        self.setRowHeight(0, height - 2)  # 单元格行高
