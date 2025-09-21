@@ -5,25 +5,32 @@ import numpy
 from PIL import ImageFile
 
 
-def calc_hash(image: ImageFile, hash_size: int = 8) -> dict:
+def calc_hash(image: ImageFile, hash_type: str = 'ahash', hash_size: int = 8) -> dict:
     """计算图片的3种图片Hash值
     :param image: PIL.ImageFile图片对象
+    :param hash_type: 计算的hash类型，ahash/phash/dhash/all
     :param hash_size: 计算的图片Hash值的边长
     :return: dict，{'ahash':None,'phash':None,'dhash':None}
     """
     hash_dict = {'ahash': None, 'phash': None, 'dhash': None}
-    # 计算均值哈希
-    ahash = imagehash.average_hash(image, hash_size=hash_size)
-    ahash_str = numpy_hash_to_str(ahash)
-    hash_dict['ahash'] = ahash_str
-    # 感知哈希
-    phash = imagehash.phash(image, hash_size=hash_size)
-    phash_str = numpy_hash_to_str(phash)
-    hash_dict['phash'] = phash_str
-    # 差异哈希
-    dhash = imagehash.dhash(image, hash_size=hash_size)
-    dhash_str = numpy_hash_to_str(dhash)
-    hash_dict['dhash'] = dhash_str
+
+    if hash_type.lower() == 'all' or hash_type.lower() == 'ahash':
+        # 计算均值哈希
+        ahash = imagehash.average_hash(image, hash_size=hash_size)
+        ahash_str = numpy_hash_to_str(ahash)
+        hash_dict['ahash'] = ahash_str
+
+    if hash_type.lower() == 'all' or hash_type.lower() == 'phash':
+        # 感知哈希
+        phash = imagehash.phash(image, hash_size=hash_size)
+        phash_str = numpy_hash_to_str(phash)
+        hash_dict['phash'] = phash_str
+
+    if hash_type.lower() == 'all' or hash_type.lower() == 'dhash':
+        # 差异哈希
+        dhash = imagehash.dhash(image, hash_size=hash_size)
+        dhash_str = numpy_hash_to_str(dhash)
+        hash_dict['dhash'] = dhash_str
 
     return hash_dict
 
