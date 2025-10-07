@@ -63,6 +63,8 @@ def read_image(archive_path: str, image_path: str) -> bytes:
     """读取压缩文件中的指定图片，返回一个bytes图片对象
     :param archive_path: str，压缩文件路径
     :param image_path: str，压缩包内部图片路径"""
+    # 由于zipfile仅支持/路径分隔符，而不支持\，所以需要将\都替换为/
+    image_path = image_path.replace('\\', '/')
     archive = read_archive(archive_path)
     if not archive:
         raise Exception('未正确读取文件，该文件不是压缩文件或文件不存在')

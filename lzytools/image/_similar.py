@@ -1,11 +1,14 @@
+from typing import Literal
 from typing import Union
 
 import imagehash
 import numpy
 from PIL import ImageFile
 
+HASH_TYPE = Literal['ahash', 'phash', 'dhash', 'all']
 
-def calc_hash(image: ImageFile, hash_type: str = 'ahash', hash_size: int = 8) -> dict:
+
+def calc_hash(image: ImageFile, hash_type: HASH_TYPE = 'ahash', hash_size: int = 8) -> dict:
     """计算图片的3种图片Hash值
     :param image: PIL.ImageFile图片对象
     :param hash_type: 计算的hash类型，ahash/phash/dhash/all
