@@ -20,6 +20,12 @@ class LabelImageAutoSize(QLabel):
         self.pixmap_original = QPixmap(image_path)
         self.update_image_size()
 
+    def set_bytes_image(self, data: bytes):
+        """设置bytes图片"""
+        self.pixmap_original = QPixmap()
+        self.pixmap_original.loadFromData(data, format=None)
+        self.update_image_size()
+
     def update_image_size(self):
         """更新图片尺寸"""
         if self.pixmap_original and not self.pixmap_original.isNull():
