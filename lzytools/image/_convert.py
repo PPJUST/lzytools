@@ -13,6 +13,7 @@ def bytes_to_numpy(bytes_image: bytes) -> numpy.ndarray:
     bytesio_image = io.BytesIO(bytes_image)  # 转为BytesIO对象
     pil_image = Image.open(bytesio_image)  # 转PIL.Image
     numpy_image = numpy.array(pil_image)  # 转NumPy数组
+    pil_image.close()
 
     return numpy_image
 
@@ -25,6 +26,7 @@ def numpy_to_bytes(numpy_image: numpy.ndarray) -> bytes:
     bytes_image = io.BytesIO()  # 转为BytesIO对象
     image.save(bytes_image, format=image.format)
     bytes_image = bytes_image.getvalue()
+    image.close()
 
     return bytes_image
 

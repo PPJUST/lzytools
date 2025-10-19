@@ -27,6 +27,7 @@ def save_bytes_image(bytes_image: bytes, dirpath: str, filename: str) -> str:
     if not os.path.exists(dirpath):
         os.mkdir(save_path)
     image.save(save_path)
+    image.close()
 
     return save_path
 
@@ -53,6 +54,7 @@ def save_numpy_image(numpy_image: numpy.ndarray, dirpath: str, filename: str) ->
     if not os.path.exists(dirpath):
         os.mkdir(save_path)
     image.save(save_path)
+    image.close()
 
     return save_path
 

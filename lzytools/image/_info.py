@@ -13,6 +13,7 @@ def get_image_size(image_path: str):
     :param image_path: str，本地图片路径"""
     image = Image.open(image_path)
     size = image.size
+    image.close()
     return size
 
 
@@ -41,4 +42,5 @@ def get_image_size_from_archive(archive_path: str, image_path: str) -> tuple[int
     image_stream = io.BytesIO(image_bytes)
     image_pil = Image.open(image_stream)
     size = image_pil.size
+    image_pil.close()
     return size

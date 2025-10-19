@@ -15,6 +15,7 @@ def is_pure_color_image(image_path: str) -> bool:
         return False
 
     dhash = imagehash.average_hash(image_pil, hash_size=16)
+    image_pil.close()
     hash_str = numpy_hash_to_str(dhash)
 
     if hash_str.count('0') == len(hash_str):
