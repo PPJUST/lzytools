@@ -2,10 +2,10 @@ from PySide6.QtCore import *
 
 
 class QtimerSingleShot(QTimer):
-    """单例单次触发的计时器"""
+    """单次触发的Timer（单例）"""
     _instance = None
     _is_init = False
-    timeStart = Signal(name='开始信号')
+    timeStart = Signal()
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:

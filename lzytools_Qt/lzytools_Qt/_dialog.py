@@ -1,15 +1,17 @@
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-from ._function import set_transparent_background
+from ._utils import set_transparent_background, set_no_frame
 
 
-class DialogGifPlayer(QDialog):
-    """播放GIF动画的QDialog"""
+class DialogPlayGif(QDialog):
+    """置顶播放Gif的Dialog"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
         set_transparent_background(self)
+        set_no_frame(self)
 
         # 添加label
         self.label_gif = QLabel('GIF PLAYER')
@@ -19,10 +21,10 @@ class DialogGifPlayer(QDialog):
         # 添加动画对象
         self.gif = None
 
-    def set_gif(self, gif: str):
+    def set_gif(self, gif_path: str):
         """设置gif
-        :param gif: str，gif文件路径"""
-        self.gif = QMovie(gif)
+        :param gif_path: Gif文件路径"""
+        self.gif = QMovie(gif_path)
         self.label_gif.setMovie(self.gif)
 
     def play(self):

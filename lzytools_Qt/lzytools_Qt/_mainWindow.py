@@ -2,16 +2,15 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-from ._function import set_transparent_background
+from ._utils import set_transparent_background, set_no_frame
 
 
 class TopTip(QMainWindow):
-    """显示一个置顶的提示文本
-    新增功能：淡入淡出动画"""
+    """显示置顶并且淡入淡出文本的控件"""
+    _STYLESHEET_TEXT = 'font-size: 15pt; color: blue'
 
     def __init__(self, text: str):
         super().__init__()
-
         # 添加显示文字的子控件
         self.label_showed = None
         self._add_label(str(text))
@@ -19,7 +18,8 @@ class TopTip(QMainWindow):
         # 设置定时器
         self.timer_fade = QTimer(self)
         self.timer_fade.timeout.connect(self._fade_out)
-        self.timer_fade.start(2000)  # 留存2秒
+        self.duration: int = 2  # 留存时间，秒
+        self.timer_fade.start(self.duration * 1000)
 
         # 设置淡入淡出动画
         self.animation = QPropertyAnimation()
@@ -27,6 +27,10 @@ class TopTip(QMainWindow):
 
         # 设置透明属性
         set_transparent_background(self)
+
+        # 设置无边框
+        set_no_frame(self)
+
         # 设置置顶显示
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
@@ -38,13 +42,18 @@ class TopTip(QMainWindow):
         self.animation.start()
 
     def set_duration(self, duration: int):
-        """设置提示文本留存时间"""
-        self.timer_fade.start(duration)
+        """设置留存时间（秒）"""
+        self.duration = duration
+        self.timer_fade.start(self.duration * 1000)
+
+    def set_stylesheet(self, stylesheet: str):
+        """设置文本样式表"""
+        self._STYLESHEET_TEXT = stylesheet
 
     def _add_label(self, text: str):
         """添加子控件"""
         label = QLabel(str(text))
-        label.setStyleSheet("font-size: 15pt; color: blue")
+        label.setStyleSheet(self._STYLESHEET_TEXT)
         self.setCentralWidget(label)
 
     def _show_in_center(self):

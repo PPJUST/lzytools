@@ -4,7 +4,7 @@ from PySide6.QtWidgets import *
 
 
 class ToolButtonRightClick(QToolButton):
-    """支持右键点击信号的QToolButton"""
+    """支持右键点击信号的ToolButton"""
     rightClicked = Signal()
 
     def __init__(self, parent=None):

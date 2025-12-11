@@ -4,8 +4,8 @@ from PySide6.QtWidgets import *
 
 
 class StyledItemDelegateImage(QStyledItemDelegate):
-    """项目视图委托QStyledItemDelegate，在QStandardItem中显示自适应大小的图像
-    注意：图像路径需在保存在QStandardItem的UserRole属性中"""
+    """用于在QStandardItem中显示自适应大小的图像的项目视图委托QStyledItemDelegate
+    注意：图片数据需在保存在QStandardItem的UserRole属性中"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -14,7 +14,7 @@ class StyledItemDelegateImage(QStyledItemDelegate):
         # 获取QStandardItem中的图片数据
         pixmap = index.data(Qt.UserRole)
         if not pixmap:
-            raise Exception('错误，图像路径需在保存在QStandardItem的UserRole属性中')
+            raise Exception('错误，图片数据需在保存在QStandardItem的UserRole属性中')
 
         # 创建绘制工具
         item_rect = option.rect
