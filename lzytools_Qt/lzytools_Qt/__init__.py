@@ -1,4 +1,4 @@
-from _mainWindow import *
+from ._mainWindow import *
 from ._button import *
 from ._dialog import *
 from ._label import *
