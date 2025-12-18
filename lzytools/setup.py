@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="lzytools",  # 项目名称
-    version="0.1.0",  # 版本号
+    version="0.1.1",  # 版本号
     author="PPJUST",  # 作者
     description="Python自用包",  # 描述
     long_description='Python自用包',  # 长描述

@@ -1,3 +1,3 @@
-import common
-import file
-import time
+import lzytools.common
+import lzytools.file
+import lzytools.time

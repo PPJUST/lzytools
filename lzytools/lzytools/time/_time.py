@@ -80,7 +80,7 @@ def convert_duration_to_date(tm_seconds: float, _format: str = '%Y-%m-%d %H:%M:%
     :param tm_seconds: 时长，秒
     :param _format: 自定义时间格式
     :return: 标准格式时间"""
-    return convert_duration_to_date(tm_seconds, _format)
+    return _convert_duration_to_date(tm_seconds, _format)
 
 
 def convert_time_ymd(tm_seconds: float, _format: str = '%Y-%m-%d %H:%M:%S') -> str:
@@ -88,4 +88,4 @@ def convert_time_ymd(tm_seconds: float, _format: str = '%Y-%m-%d %H:%M:%S') -> s
     :param tm_seconds: 时长，秒
     :param _format: 自定义时间格式
     :return: 标准格式时间"""
-    return convert_duration_to_date(tm_seconds, _format)
+    return _convert_duration_to_date(tm_seconds, _format)

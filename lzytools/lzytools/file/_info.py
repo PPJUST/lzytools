@@ -5,6 +5,8 @@ import filetype
 import win32com.client  # pywin32
 from natsort import natsort
 
+from ._filepath import remove_subpaths
+
 """----------逻辑函数----------"""
 
 
