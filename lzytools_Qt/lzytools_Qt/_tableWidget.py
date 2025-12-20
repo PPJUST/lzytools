@@ -3,9 +3,9 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 
-class TabelWidgetHiddenOverLengthText(QTableWidget):
-    """文本框控件，自动隐藏长文本（abcd->a...）
-    备注：利用tableWidget的文本单元格自动隐藏长文本的特性"""
+class TableWidgetHiddenOverLengthText(QTableWidget):
+    """自动隐藏长文本的文本框控件，支持拉伸（abcd->a...）
+    利用tableWidget的文本单元格自动隐藏长文本的特性"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
