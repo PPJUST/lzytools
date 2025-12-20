@@ -24,8 +24,8 @@ def _format_duration(duration: float, _format: str = '%H:%M:%S') -> str:
 
     time_str = _format.replace('%D', str(days))
     time_str = time_str.replace('%H', str(hours))
-    time_str = time_str.replace('%M', str(minutes))
-    time_str = time_str.replace('%S', str(seconds))
+    time_str = time_str.replace('%M', str(minutes).zfill(2))
+    time_str = time_str.replace('%S', str(seconds).zfill(2))
 
     return time_str
 
