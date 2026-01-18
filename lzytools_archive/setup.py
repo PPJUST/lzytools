@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="lzytools_archive",  # 项目名称
-    version="0.0.2",  # 版本号
+    version="0.0.3",  # 版本号
     author="PPJUST",  # 作者
     description="Python自用包-压缩文件相关方法",  # 描述
     long_description='Python自用包-压缩文件相关方法',  # 长描述

@@ -53,7 +53,7 @@ def _guess_first_volume_archive_filename(filename: str) -> Union[str, None]:
     elif re.match(_PATTERN_RAR_EXE, filename, flags=re.I):
         filetitle = re.match(_PATTERN_RAR_EXE, filename, flags=re.I).group(1)
         number_length = len(re.match(_PATTERN_RAR_EXE, filename, flags=re.I).group(2))  # 处理part1.rar和part01.rar的情况
-        guess_filename = f'{filetitle}.part{"1".zfill(number_length)}.rar'
+        guess_filename = f'{filetitle}.part{"1".zfill(number_length)}.exe'
     # test.part1/test.part2/test.part3
     elif re.match(_PATTERN_RAR_WITHOUT_SUFFIX, filename, flags=re.I):
         filetitle = re.match(_PATTERN_RAR_WITHOUT_SUFFIX, filename, flags=re.I).group(1)
