@@ -66,6 +66,7 @@ def _get_parent_dirpath(filepath: str, parent_level: int = 1):
         parent_path = path.parents[max_index]  # 超限返回根目录
     else:
         parent_path = path.parents[max_index - 1]
+    parent_path = os.path.normpath(str(parent_path))
     return parent_path
 
 
