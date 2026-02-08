@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Tuple
 
 import natsort
@@ -55,6 +56,19 @@ def _get_parent_dirpaths(path: str) -> list:
     return parent_dirs
 
 
+def _get_parent_dirpath(filepath: str, parent_level: int = 1):
+    """获取漫画的第n层父目录
+    :param filepath: 文件路径
+    :param parent_level: 父目录层级"""
+    path = Path(filepath)
+    max_index = len(path.parents) - 1
+    if parent_level > max_index:
+        parent_path = path.parents[max_index]  # 超限返回根目录
+    else:
+        parent_path = path.parents[max_index - 1]
+    return parent_path
+
+
 def _remove_subpaths(paths: list):
     """剔除传入路径列表中的子路径，仅保留最上级路径"""
     paths = [os.path.normpath(path) for path in paths]
@@ -105,6 +119,13 @@ def get_parent_dirpaths(path: str) -> list:
     :param path: 文件/文件夹路径
     :return: 所有上级目录列表，层级越高，顺序越前"""
     return _get_parent_dirpaths(path)
+
+
+def get_parent_dirpath(filepath: str, parent_level: int = 1):
+    """获取漫画的第n层父目录
+    :param filepath: 文件路径
+    :param parent_level: 父目录层级"""
+    return _get_parent_dirpath(filepath, parent_level)
 
 
 def remove_subpaths(paths: list):
