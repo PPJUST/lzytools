@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from typing import Tuple
 
@@ -97,6 +98,12 @@ def _is_subpath(parent_path: str, child_path: str) -> bool:
     return common_prefix == parent
 
 
+def _copy_file_to_clipboard(file_path: str):
+    """调用PowerShell命令复制文件到剪切板"""
+    cmd = f'powershell "Set-Clipboard -Path \'{file_path}\'"'
+    subprocess.run(cmd, shell=True, check=True)
+
+
 """----------调用函数----------"""
 
 
@@ -137,3 +144,8 @@ def remove_subpaths(paths: list):
 def is_subpath(parent_path: str, child_path: str) -> bool:
     """判断一个路径是否为另一个路径的子路径"""
     return _is_subpath(parent_path, child_path)
+
+
+def copy_file_to_clipboard(file_path: str):
+    """调用PowerShell命令复制文件到剪切板"""
+    return _copy_file_to_clipboard(file_path)
