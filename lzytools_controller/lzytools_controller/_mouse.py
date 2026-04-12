@@ -125,3 +125,75 @@ def _scroll_wheel(distance: int = 0):
 
 
 """----------调用函数----------"""
+
+
+def get_position() -> Tuple[int, int]:
+    """获取鼠标当前的轴坐标
+    :return: x, y
+    """
+    return _get_position()
+
+
+def move_to_position(x: int, y: int, duration: float = 0.5):
+    """移动鼠标至指定轴坐标
+    :param x: x轴坐标
+    :param y: y轴坐标
+    :param duration: 移动时长，值为0时为瞬间移动
+    :return: 移动后的轴坐标
+    """
+    return _move_to_position(x, y, duration)
+
+
+def drag_to_position(x: int, y: int, button: MouseButton = MouseKey.Left, duration: float = 0.5):
+    """拖动鼠标至指定轴坐标
+    :param x: x轴坐标
+    :param y: y轴坐标
+    :param button: 鼠标按键
+    :param duration: 移动时长，值为0时为瞬间移动
+    :return: 移动后的轴坐标
+    """
+    return _drag_to_position(x, y, button, duration)
+
+
+def move_relative(angle: float = 0.00, distance: int = 0, duration: float = 0.5):
+    """向指定方向移动鼠标
+    :param angle: 角度，-360°~360°，以水平向左为0°，垂直向下为90°，垂直向上为-90°
+    :param distance: 移动距离
+    :param duration: 移动时长，值为0时为瞬间移动
+    :return: 移动后的轴坐标
+    """
+    return _move_relative(angle, distance, duration)
+
+
+def click(button: MouseButton = MouseKey.Left, click_count: int = 1, click_interval: float = 0.1):
+    """连续点击鼠标按键
+    :param button: 鼠标按键
+    :param click_count: 点击次数
+    :param click_interval: 每次点击间隔的时间（秒）
+    :return: 点击的按键
+    """
+    return _click(button, click_count, click_interval)
+
+
+def press(button: MouseButton = MouseKey.Left):
+    """按下鼠标按键
+    :param button: 鼠标按键
+    :return: 按下的按键
+    """
+    return _press(button)
+
+
+def release(button: MouseButton = MouseKey.Left):
+    """释放鼠标按键
+    :param button: 鼠标按键
+    :return: 释放的按键
+    """
+    return _release(button)
+
+
+def scroll_wheel(distance: int = 0):
+    """滚动滚轮
+    :param distance: 滚动格数，+为向上滚动，-为向下滚动
+    :return: 滚动格数
+    """
+    return _scroll_wheel(distance)

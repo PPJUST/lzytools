@@ -9,7 +9,7 @@ from ._pyautogui_keyboard_keys import KEY_NAMES
 """----------逻辑函数----------"""
 
 
-def press_chars(chars: str, loop_count: int = 1, loop_interval: float = 0.1):
+def _press_chars(chars: str, loop_count: int = 1, loop_interval: float = 0.1):
     """输入文本
     :param chars: 要输入的文本
     :param loop_count: 重复次数
@@ -24,7 +24,7 @@ def press_chars(chars: str, loop_count: int = 1, loop_interval: float = 0.1):
     return chars
 
 
-def click_keys(keys: Union[list, str], loop_count: int = 1, loop_interval: float = 0.1):
+def _click_keys(keys: Union[list, str], loop_count: int = 1, loop_interval: float = 0.1):
     """逐个敲击指定键，支持多键（不能实现热键组合）
     :param keys:需要敲击的键
     :param loop_count: 重复次数
@@ -43,7 +43,7 @@ def click_keys(keys: Union[list, str], loop_count: int = 1, loop_interval: float
     return keys
 
 
-def press_key(key: str):
+def _press_key(key: str):
     """按下指定键
     :param key:要按下的键
     :return: 按下的键
@@ -53,7 +53,7 @@ def press_key(key: str):
     return key
 
 
-def release_key(key: str):
+def _release_key(key: str):
     """释放指定键
     :param key:要释放的键
     :return: 释放的键
@@ -63,7 +63,7 @@ def release_key(key: str):
     return key
 
 
-def press_hotkey(hotkeys: Union[list, str]):
+def _press_hotkey(hotkeys: Union[list, str]):
     """敲击热键组合
     :param hotkeys:需要敲击的热键组合
     :return: 敲击的热键组合
@@ -81,3 +81,47 @@ def press_hotkey(hotkeys: Union[list, str]):
 
 
 """----------调用函数----------"""
+
+
+def press_chars(chars: str, loop_count: int = 1, loop_interval: float = 0.1):
+    """输入文本
+    :param chars: 要输入的文本
+    :param loop_count: 重复次数
+    :param loop_interval:每次重复的间隔时间（秒）
+    :return: 输入的文本
+    """
+    return _press_chars(chars, loop_count, loop_interval)
+
+
+def click_keys(keys: Union[list, str], loop_count: int = 1, loop_interval: float = 0.1):
+    """逐个敲击指定键，支持多键（不能实现热键组合）
+    :param keys:需要敲击的键
+    :param loop_count: 重复次数
+    :param loop_interval:每次重复的间隔时间（秒）
+    :return: 敲击的键
+    """
+    return _click_keys(keys, loop_count, loop_interval)
+
+
+def press_key(key: str):
+    """按下指定键
+    :param key:要按下的键
+    :return: 按下的键
+    """
+    return _press_key(key)
+
+
+def release_key(key: str):
+    """释放指定键
+    :param key:要释放的键
+    :return: 释放的键
+    """
+    return _release_key(key)
+
+
+def press_hotkey(hotkeys: Union[list, str]):
+    """敲击热键组合
+    :param hotkeys:需要敲击的热键组合
+    :return: 敲击的热键组合
+    """
+    return _press_hotkey(hotkeys)
