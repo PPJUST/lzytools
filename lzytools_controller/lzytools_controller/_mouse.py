@@ -4,6 +4,7 @@ from typing import Tuple
 import pyautogui
 
 from ._class_key import MouseKey, MouseButton
+from ._class_tweening import TweeningTpye, Tweening
 
 """----------逻辑函数----------"""
 
@@ -17,42 +18,47 @@ def _get_position() -> Tuple[int, int]:
     return mouse_x, mouse_y
 
 
-def _move_to_position(x: int, y: int, duration: float = 0.5):
+def _move_to_position(x: int, y: int, duration: float = 0.5, tweening: TweeningTpye = Tweening.Linear):
     """移动鼠标至指定轴坐标
     :param x: x轴坐标
     :param y: y轴坐标
     :param duration: 移动时长，值为0时为瞬间移动
+    :param tweening: 移动轨迹函数
     :return: 移动后的轴坐标
     """
     if x == 0 and y == 0:  # 鼠标位于坐标轴(0, 0)时，pyautogui会触发中断机制返回报错
         x, y = 1, 1
 
-    pyautogui.moveTo(x, y, duration=duration)
+    pyautogui.moveTo(x, y, duration=duration, tween=tweening.value)
 
     return x, y
 
 
-def _drag_to_position(x: int, y: int, button: MouseButton = MouseKey.Left, duration: float = 0.5):
+def _drag_to_position(x: int, y: int, button: MouseButton = MouseKey.Left, duration: float = 0.5,
+                      tweening: TweeningTpye = Tweening.Linear):
     """拖动鼠标至指定轴坐标
     :param x: x轴坐标
     :param y: y轴坐标
     :param button: 鼠标按键
     :param duration: 移动时长，值为0时为瞬间移动
+    :param tweening: 移动轨迹函数
     :return: 移动后的轴坐标
     """
     if x == 0 and y == 0:  # 鼠标位于坐标轴(0, 0)时，pyautogui会触发中断机制返回报错
         x, y = 1, 1
 
-    pyautogui.dragTo(x, y, button=button.value, duration=duration)
+    pyautogui.dragTo(x, y, button=button.value, duration=duration, tween=tweening.value)
 
     return x, y
 
 
-def _move_relative(angle: float = 0.00, distance: int = 0, duration: float = 0.5):
+def _move_relative(angle: float = 0.00, distance: int = 0, duration: float = 0.5,
+                   tweening: TweeningTpye = Tweening.Linear):
     """向指定方向移动鼠标
     :param angle: 角度，-360°~360°，以水平向左为0°，垂直向下为90°，垂直向上为-90°
     :param distance: 移动距离
     :param duration: 移动时长，值为0时为瞬间移动
+    :param tweening: 移动轨迹函数
     :return: 移动后的轴坐标
     """
     # 获取当前坐标
@@ -77,7 +83,7 @@ def _move_relative(angle: float = 0.00, distance: int = 0, duration: float = 0.5
     if new_x == 0 and new_y == 0:  # 鼠标位于坐标轴(0, 0)时，pyautogui会触发中断机制返回报错
         new_x, new_y = 1, 1
 
-    pyautogui.moveTo(new_x, new_y, duration=duration)
+    pyautogui.moveTo(new_x, new_y, duration=duration, tween=tweening.value)
 
     return new_x, new_y
 
@@ -134,35 +140,40 @@ def get_position() -> Tuple[int, int]:
     return _get_position()
 
 
-def move_to_position(x: int, y: int, duration: float = 0.5):
+def move_to_position(x: int, y: int, duration: float = 0.5, tweening: TweeningTpye = Tweening.Linear):
     """移动鼠标至指定轴坐标
     :param x: x轴坐标
     :param y: y轴坐标
     :param duration: 移动时长，值为0时为瞬间移动
+    :param tweening: 移动轨迹函数
     :return: 移动后的轴坐标
     """
-    return _move_to_position(x, y, duration)
+    return _move_to_position(x, y, duration, tweening)
 
 
-def drag_to_position(x: int, y: int, button: MouseButton = MouseKey.Left, duration: float = 0.5):
+def drag_to_position(x: int, y: int, button: MouseButton = MouseKey.Left, duration: float = 0.5,
+                     tweening: TweeningTpye = Tweening.Linear):
     """拖动鼠标至指定轴坐标
     :param x: x轴坐标
     :param y: y轴坐标
     :param button: 鼠标按键
     :param duration: 移动时长，值为0时为瞬间移动
+    :param tweening: 移动轨迹函数
     :return: 移动后的轴坐标
     """
-    return _drag_to_position(x, y, button, duration)
+    return _drag_to_position(x, y, button, duration, tweening)
 
 
-def move_relative(angle: float = 0.00, distance: int = 0, duration: float = 0.5):
+def move_relative(angle: float = 0.00, distance: int = 0, duration: float = 0.5,
+                  tweening: TweeningTpye = Tweening.Linear):
     """向指定方向移动鼠标
     :param angle: 角度，-360°~360°，以水平向左为0°，垂直向下为90°，垂直向上为-90°
     :param distance: 移动距离
     :param duration: 移动时长，值为0时为瞬间移动
+    :param tweening: 移动轨迹函数
     :return: 移动后的轴坐标
     """
-    return _move_relative(angle, distance, duration)
+    return _move_relative(angle, distance, duration, tweening)
 
 
 def click(button: MouseButton = MouseKey.Left, click_count: int = 1, click_interval: float = 0.1):
