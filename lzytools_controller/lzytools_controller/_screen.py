@@ -37,17 +37,19 @@ def _check_rbg_color(x: int, y: int, rbg_color: Tuple[int, int, int], tolerance:
     return is_match
 
 
-def _screenshot_fullscreen(pic_file: str = 'screenshot.png'):
+def _screenshot_fullscreen(pic_file: str = None):
     """全屏截图
     :param pic_file:保存的图片路径
-    return: 保存的图片路径
+    return: 保存的图片路径或PIL.Image图片对象
     """
-    pyautogui.screenshot(pic_file)  # 返回PIL.Image对象
+    if pic_file:
+        pyautogui.screenshot(pic_file)
+        return pic_file
+    else:
+        return pyautogui.screenshot()  # 返回PIL.Image对象
 
-    return pic_file
 
-
-def _screenshot_area(area: Tuple[Tuple[int, int], Tuple[int, int]], pic_file: str = 'screenshot.png'):
+def _screenshot_area(area: Tuple[Tuple[int, int], Tuple[int, int]], pic_file: str = None):
     """截图指定区域
     :param area: 截图坐标，任意两个对角的轴坐标
     :param pic_file:保存的图片路径
@@ -60,9 +62,11 @@ def _screenshot_area(area: Tuple[Tuple[int, int], Tuple[int, int]], pic_file: st
     height = abs(area[0][1] - area[1][1])
     region = (x, y, width, height)
 
-    pyautogui.screenshot(pic_file, region=region)  # 返回PIL.Image对象
-
-    return pic_file
+    if pic_file:
+        pyautogui.screenshot(pic_file, region=region)
+        return pic_file
+    else:
+        return pyautogui.screenshot(region=region)  # 返回PIL.Image对象
 
 
 def _search_image_position(numpy_image: numpy.ndarray, precision: float = 0.95, gray_mode: bool = False,
@@ -152,7 +156,7 @@ def check_rbg_color(x: int, y: int, rbg_color: Tuple[int, int, int], tolerance: 
     return _check_rbg_color(x, y, rbg_color, tolerance)
 
 
-def screenshot_fullscreen(pic_file: str = 'screenshot.png'):
+def screenshot_fullscreen(pic_file: str = None):
     """全屏截图
     :param pic_file:保存的图片路径
     return: 保存的图片路径
@@ -160,7 +164,7 @@ def screenshot_fullscreen(pic_file: str = 'screenshot.png'):
     return _screenshot_fullscreen(pic_file)
 
 
-def screenshot_area(area: Tuple[Tuple[int, int], Tuple[int, int]], pic_file: str = 'screenshot.png'):
+def screenshot_area(area: Tuple[Tuple[int, int], Tuple[int, int]], pic_file: str = None):
     """截图指定区域
     :param area: 截图坐标，任意两个对角的轴坐标
     :param pic_file:保存的图片路径
