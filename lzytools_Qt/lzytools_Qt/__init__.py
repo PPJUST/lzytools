@@ -3,6 +3,7 @@ from ._dialog import *
 from ._label import *
 from ._lineEdit import *
 from ._mainWindow import *
+from ._screen import *
 from ._slider import *
 from ._styledItemDelegate import *
 from ._tableWidget import *

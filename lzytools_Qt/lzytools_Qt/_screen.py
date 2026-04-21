@@ -3,9 +3,9 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 
-class DialogScreenshot(QDialog):
-    """添加全屏的半透明遮罩，实现截图操作操作"""
-    signal_screenshot = Signal(bytes)
+class DialogScreenRegionSelect(QDialog):
+    """框选屏幕区域的Dialog"""
+    SelectedRegion = Signal(int, int, int, int, name='左上角x轴坐标，左上角y轴坐标，宽度，高度')
 
     def __init__(self):
         super().__init__()
@@ -25,40 +25,29 @@ class DialogScreenshot(QDialog):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        widget = WidgetFrameSelect()
-        widget.signal_screenshot_area.connect(self.screenshot)
+        widget = _WidgetScreenRegionSelect()
+        widget.SelectedRegion.connect(self.select_region)
         widget.rightClick.connect(self.close)
         layout.addWidget(widget)
 
-    def screenshot(self, rect: QRect):
+    def select_region(self, rect: QRect):
         # 去除遮罩
         self.setWindowOpacity(0)  # 0~1，0为完全透明
-        # 截图
-        screen = QApplication.primaryScreen()
-        screenshot = screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
-        screenshot_bytes = self.pixmap_to_bytes(screenshot)
-        # 转为bytes图片对象，并发送信号
-        self.signal_screenshot.emit(screenshot_bytes)
+
+        # 提取框选区域
+        x = rect.x()
+        y = rect.y()
+        width = rect.width()
+        height = rect.height()
+
+        self.SelectedRegion.emit(x, y, width, height)
 
         self.close()
 
-    @staticmethod
-    def pixmap_to_bytes(pixmap: QPixmap) -> bytes:
-        """将QPixmap转为bytes对象。"""
-        byte_array = QByteArray()
-        buffer = QBuffer(byte_array)
-        buffer.open(QBuffer.WriteOnly)
 
-        # 将 QPixmap 转为 PNG 格式保存到内存
-        pixmap.save(buffer, "PNG")
-
-        # 转换 QByteArray 为 bytes
-        return byte_array.data()
-
-
-class WidgetFrameSelect(QWidget):
-    """在QWidget中实现截取区域的操作，发送截取区域的信号"""
-    signal_screenshot_area = Signal(QRect)  # 发送截取区域QRect
+class _WidgetScreenRegionSelect(QWidget):
+    """框选控件"""
+    SelectedRegion = Signal(QRect)  # 发送截取区域QRect
     rightClick = Signal()  # 右键信号
 
     def __init__(self):
@@ -85,10 +74,9 @@ class WidgetFrameSelect(QWidget):
         if event.button() == Qt.LeftButton and self.startPoint:
             self.endPoint = event.pos()
             self.rubberBand.hide()
-            self.take_screenshot_area()  # 获取截取区域
+            self.take_select_area()  # 获取截取区域
 
-    def take_screenshot_area(self):
-        """获取截取区域
-        注意：由于外部有半透明遮罩，所以不在该函数中直接进行截图操作"""
+    def take_select_area(self):
+        """获取框选区域"""
         rect = QRect(self.startPoint, self.endPoint).normalized()
-        self.signal_screenshot_area.emit(rect)
+        self.SelectedRegion.emit(rect)
