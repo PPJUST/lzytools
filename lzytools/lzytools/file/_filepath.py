@@ -30,8 +30,8 @@ def _reverse_path(path: str) -> str:
     :return: 反转后的路径
     """
     path = os.path.normpath(path)
-    _split_path = path.split('\\')
-    path_reversed = ' \\ '.join(_split_path[::-1])
+    path_split = path.split('\\')
+    path_reversed = ' \\ '.join(path_split[::-1])
     path_reversed = os.path.normpath(path_reversed)
     return path_reversed
 
@@ -58,7 +58,7 @@ def _get_parent_dirpaths(path: str) -> list:
 
 
 def _get_parent_dirpath(filepath: str, parent_level: int = 1):
-    """获取漫画的第n层父目录
+    """获取传入路径的第n层父目录
     :param filepath: 文件路径
     :param parent_level: 父目录层级"""
     path = Path(filepath)
@@ -130,7 +130,7 @@ def get_parent_dirpaths(path: str) -> list:
 
 
 def get_parent_dirpath(filepath: str, parent_level: int = 1):
-    """获取漫画的第n层父目录
+    """获取传入路径的第n层父目录
     :param filepath: 文件路径
     :param parent_level: 父目录层级"""
     return _get_parent_dirpath(filepath, parent_level)

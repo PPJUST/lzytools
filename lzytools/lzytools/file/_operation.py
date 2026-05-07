@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import time
 
+import natsort
 import send2trash
 
 from ._filename import create_nodup_filename_standard_digital_suffix
@@ -34,26 +35,57 @@ def _delete(path: str, send_to_trash: bool = False) -> bool:
     return False
 
 
-def _delete_empty_folder(dirpath: str, send_to_trash: bool = True):
+def _find_empty_folder(dirpath: str) -> list:
+    """搜索指定文件夹中的空文件夹（及其自身）
+    :param dirpath: 文件夹路径
+    :return: 搜索到的空文件夹路径
+    """
+    # 提取所有文件夹路径（优先遍历子目录）
+    _dirpaths = []
+    for _dirpath, dirnames, filenames in os.walk(dirpath, topdown=False):
+        _dirpaths.append(_dirpath)
+    _dirpaths.append(dirpath)  # 将其自身放于末尾
+
+    # 从子目录开始逐级搜索空文件夹
+    empty_folders = []
+    for dirpath_check in _dirpaths:
+        child_filenames = os.listdir(dirpath_check)
+        # 如果为空，则直接判断为空文件夹
+        if not child_filenames:
+            empty_folders.append(os.path.normpath(dirpath_check))
+        # 如果不为空，需要考虑子文件夹为空文件夹的情况
+        else:
+            child_paths = [os.path.normpath(os.path.join(dirpath_check, i)) for i in child_filenames]
+            if set(child_paths) & set(empty_folders) == set(child_paths):  # 如果子文件/子文件夹都为空文件夹
+                empty_folders.append(os.path.normpath(dirpath_check))
+
+    empty_folders = natsort.os_sorted(empty_folders)
+
+    return empty_folders
+
+
+def _delete_empty_folder(dirpath: str, send_to_trash: bool = True) -> list:
     """删除指定文件夹中的空文件夹（及其自身）
     :param dirpath: 文件夹路径
     :param send_to_trash: 是否删除至回收站
+    :return: 删除的文件夹路径
     """
-    _dirpaths = []
+    empty_folders = _find_empty_folder(dirpath)
 
-    # 提取所有文件夹路径
-    for _dirpath, dirnames, filenames in os.walk(dirpath):
-        _dirpaths.append(_dirpath)
+    deleted_paths = []
 
-    _dirpaths.insert(0, dirpath)  # 将其自身放于首位
+    if send_to_trash:
+        for empty_folder in empty_folders:
+            if os.path.exists(empty_folder):
+                send2trash.send2trash(empty_folder)
+                deleted_paths.append(empty_folder)
+    else:
+        for empty_folder in empty_folders:
+            if os.path.exists(empty_folder):
+                os.rmdir(empty_folder)
+                deleted_paths.append(empty_folder)
 
-    # 从后往前逐级删除
-    for child_dirpath in _dirpaths[::-1]:
-        if not os.listdir(child_dirpath):
-            if send_to_trash:
-                send2trash.send2trash(child_dirpath)
-            else:
-                os.rmdir(child_dirpath)
+    return deleted_paths
 
 
 def _set_hidden_attrib(path: str, is_hidden: bool = False) -> bool:
@@ -142,10 +174,19 @@ def delete(path: str, send_to_trash: bool = False) -> bool:
     return _delete(path, send_to_trash)
 
 
-def delete_empty_folder(dirpath: str, send_to_trash: bool = True):
+def find_empty_folder(dirpath: str) -> list:
+    """搜索指定文件夹中的空文件夹（及其自身）
+    :param dirpath: 文件夹路径
+    :return: 搜索到的空文件夹路径
+    """
+    return _find_empty_folder(dirpath)
+
+
+def delete_empty_folder(dirpath: str, send_to_trash: bool = True) -> list:
     """删除指定文件夹中的空文件夹（及其自身）
     :param dirpath: 文件夹路径
     :param send_to_trash: 是否删除至回收站
+    :return: 删除的文件夹路径
     """
     return _delete_empty_folder(dirpath, send_to_trash)
 
