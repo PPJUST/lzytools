@@ -1,6 +1,7 @@
-"""
-修复pynput模块中HotKey类的问题，使其能够正确识别小键盘数字（bug为小键盘数字的'_scan'属性没有被正确地赋值）
-"""
+# 修复pynput模块中HotKey类的bug，使其能够正确识别小键盘数字
+# bug：小键盘数字的'_scan'属性没有被正确地赋值
+
+
 from pynput import keyboard
 
 
@@ -38,7 +39,8 @@ class GlobalHotKeysFix(keyboard.Listener):
 
 
 """
-下面方法可行，但不优美
+# 备选方案
+
 class HotKeyFix(keyboard.HotKey):
     def __init__(self, keys, on_activate):
         super().__init__(keys, on_activate)

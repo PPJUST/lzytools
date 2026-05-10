@@ -3,6 +3,11 @@ from typing import Tuple, Union, List
 import numpy
 import pyautogui
 
+"""
+pyautogui库关于图像的操作调用了PyScreeze库
+如果指定了confidence参数，则需要安装opencv库
+"""
+
 """----------逻辑函数----------"""
 
 
