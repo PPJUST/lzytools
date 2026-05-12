@@ -16,5 +16,20 @@ class MouseKey:
         """鼠标中键"""
         value = 'middle'
 
+class MouseEvent:
+    class Press:
+        """鼠标按下事件"""
+        value = 'press'
+    class Release:
+        """鼠标释放事件"""
+        value = 'release'
 
+class MouseScroll:
+    """鼠标滚轮事件"""
+    class Up:
+        """鼠标滚轮向上"""
+        value = 'up'
+    class Down:
+        """鼠标滚轮向下"""
+        value = 'down'
 MouseButton = Union[Type[MouseKey.Left], Type[MouseKey.Right], Type[MouseKey.Middle]]

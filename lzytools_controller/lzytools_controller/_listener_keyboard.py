@@ -1,29 +1,63 @@
 # 监听器
+import time
+from typing import List
+
 from pynput import keyboard
 
-def on_press(key):
-    try:
-        print('alphanumeric key {0} pressed'.format(
-            key.char))
-    except AttributeError:
-        print('special key {0} pressed'.format(
-            key))
 
-def on_release(key):
-    print('{0} released'.format(
-        key))
-    if key == keyboard.Key.esc:
-        # Stop listener
-        return False
+class KeyboardEventInfo:
+    """键盘事件信息"""
 
-# Collect events until released
-with keyboard.Listener(
-        on_press=on_press,
-        on_release=on_release) as listener:
-    listener.join()
+    class Press:
+        """按下键盘事件"""
 
-# ...or, in a non-blocking fashion:
-listener = keyboard.Listener(
-    on_press=on_press,
-    on_release=on_release)
-listener.start()
+        def __init__(self, _time, key):
+            self.time = _time
+            self.key = key
+
+    class Release:
+        """释放键盘事件"""
+
+        def __init__(self, _time, key):
+            self.time = _time
+            self.key = key
+
+
+class ListenerKeyboard:
+    """键盘事件监听器"""
+
+    def __init__(self):
+        self.events_collector: List[KeyboardEventInfo] = []
+        self.listener = keyboard.Listener(
+            on_press=self._on_press,
+            on_release=self._on_release)
+
+    def get_listener(self):
+        return self.listener
+
+    def start(self):
+        self.events_collector.clear()
+        self.listener.start()
+
+    def get_events(self):
+        return self.events_collector
+
+    def _on_press(self, key):
+        """按下事件"""
+        print(key)
+        time_ = time.time()
+        event = KeyboardEventInfo.Press(time_, key)
+        self.events_collector.append(event)
+
+    def _on_release(self, key):
+        """释放事件"""
+        print(key)
+        time_ = time.time()
+        event = KeyboardEventInfo.Release(time_, key)
+        self.events_collector.append(event)
+
+
+if __name__ == '__main__':
+    l1 = ListenerKeyboard()
+    l1.start()
+    time.sleep(100)
