@@ -14,45 +14,45 @@ class MouseEventInfo:
         """鼠标移动事件"""
 
         def __init__(self, _time, x, y):
-            self.time = _time
-            self.x = x
-            self.y = y
+            self.time: float = _time
+            self.x: int = x
+            self.y: int = y
 
     class Press:
         """按下鼠标事件"""
 
         def __init__(self, _time, x, y, button):
-            self.time = _time
-            self.x = x
-            self.y = y
-            self.button = button
+            self.time: float = _time
+            self.x: int = x
+            self.y: int = y
+            self.button: MouseKey = button
 
     class Release:
         """释放鼠标事件"""
 
         def __init__(self, _time, x, y, button):
-            self.time = _time
-            self.x = x
-            self.y = y
-            self.button = button
+            self.time: float = _time
+            self.x: int = x
+            self.y: int = y
+            self.button: MouseKey = button
 
     class Click:
         """鼠标点击事件"""
 
         def __init__(self, _time, x, y, button):
-            self.time = _time
-            self.x = x
-            self.y = y
-            self.button = button
+            self.time: float = _time
+            self.x: int = x
+            self.y: int = y
+            self.button: MouseKey = button
 
     class Scroll:
         """鼠标滚轮事件"""
 
         def __init__(self, _time, x, y, direction):
-            self.time = _time
-            self.x = x
-            self.y = y
-            self.direction = direction
+            self.time: float = _time
+            self.x: int = x
+            self.y: int = y
+            self.direction: MouseScroll = direction
 
 
 class ListenerMouse:
@@ -73,18 +73,38 @@ class ListenerMouse:
         self.listener.start()
 
     def get_events(self):
+        self._join_event()
         return self.events_collector
+
+    def _join_event(self):
+        """合并事件"""
+        # 将时间差在150ms以内的连续press+release事件合并为click事件
+        for i in range(len(self.events_collector) - 1):
+            if isinstance(self.events_collector[i], MouseEventInfo.Press) and isinstance(self.events_collector[i + 1],
+                                                                                         MouseEventInfo.Release):
+                if self.events_collector[i].button == self.events_collector[i + 1].button:
+                    if self.events_collector[i + 1].time - self.events_collector[i].time <= 0.15:
+                        _time = self.events_collector[i].time
+                        x = self.events_collector[i].x
+                        y = self.events_collector[i].y
+                        button = self.events_collector[i].button
+                        click_event = MouseEventInfo.Click(_time, x, y, button)
+                        self.events_collector[i] = click_event
+                        self.events_collector[i + 1] = None
+
+        # 剔除None
+        self.events_collector = [i for i in self.events_collector if i is not None]
 
     def _on_move(self, x, y):
         """移动事件"""
-        print(f'{x}, {y}')
+        print(f'move {x}, {y}')
         time_ = time.time()
         event = MouseEventInfo.Move(time_, x, y)
         self.events_collector.append(event)
 
     def _on_click(self, x, y, button, is_pressed):
         """点击事件"""
-        print(f'{x}, {y}, {button}, {is_pressed}')
+        print(f'click {x}, {y}, {button}, {is_pressed}')
         time_ = time.time()
 
         # 转换button
@@ -107,7 +127,7 @@ class ListenerMouse:
 
     def _on_scroll(self, x, y, dx, dy):
         """滚轮事件"""
-        print(f'{x}, {y}, {dx}, {dy}')
+        print(f'scroll {x}, {y}, {dx}, {dy}')
         time_ = time.time()
 
         # 转换direction
@@ -123,4 +143,5 @@ class ListenerMouse:
 if __name__ == '__main__':
     l1 = ListenerMouse()
     l1.start()
-    time.sleep(100)
+    time.sleep(10)
+    print(l1.get_events())
