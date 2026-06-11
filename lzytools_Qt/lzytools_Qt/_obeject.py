@@ -8,6 +8,14 @@ self.stderr_stream.TextWritten.connect(self._show_stderr_text)
 # 替换系统输出
 # sys.stdout = self.stderr_stream # 可选
 sys.stderr = self.stderr_stream
+
+# 分情况替换系统输出
+if getattr(sys, 'frozen', False):
+    # 打包方式运行程序
+    pass
+else:
+    # 源码方式运行程序
+    pass
 """
 
 
