@@ -10,7 +10,7 @@ self.stderr_stream.TextWritten.connect(self._show_stderr_text)
 sys.stderr = self.stderr_stream
 
 # 分情况替换系统输出
-if getattr(sys, 'frozen', False):
+if getattr(sys, 'frozen', False) or getattr(sys, '_nuitka', False) or '__compiled__' in globals():  # frozen处理PyInstaller打包，_nuitka处理Nuitka打包
     # 打包方式运行程序
     pass
 else:
