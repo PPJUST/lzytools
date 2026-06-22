@@ -94,8 +94,11 @@ def _is_subpath(parent_path: str, child_path: str) -> bool:
     child = os.path.abspath(os.path.normpath(child_path))
 
     # 比较公共前缀
-    common_prefix = os.path.commonpath([parent, child])
-    return common_prefix == parent
+    try:
+        common_prefix = os.path.commonpath([parent, child])
+        return common_prefix == parent
+    except ValueError:
+        return False
 
 
 def _copy_file_to_clipboard(file_path: str):
