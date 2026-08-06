@@ -144,9 +144,9 @@ def _create_nodup_filename_custom_suffix(filetitle: str, check_dirpath: str, add
         while True:
             # 组合文件名
             if filename_extension:
-                filename = f'{filetitle}{add_suffix}{count}.{filename_extension}'  # 假设为文件的文件名
+                filename = f'{filetitle}{add_suffix * count}.{filename_extension}'  # 假设为文件的文件名
             else:
-                filename = f'{filetitle}{add_suffix}{count}'  # 假设为文件夹的文件名
+                filename = f'{filetitle}{add_suffix * count}'  # 假设为文件夹的文件名
 
             # 检查
             if is_dup_filename(filename, check_dirpath):
