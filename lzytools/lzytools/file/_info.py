@@ -178,6 +178,12 @@ def get_dir_size(dirpath: str) -> int:
     return _get_dir_size(dirpath)
 
 
+def format_bytes_size(bytes_size: int, model: str = 'auto') -> str:
+    """将字节数转换为可读字符串，已选B/KB/MB/GB，保留两位小数
+    :param model: AUTO/GB/MB/KB/B"""
+    return _format_bytes_size(bytes_size, model)
+
+
 def get_files_in_dir(dirpath: str) -> list:
     """获取文件夹中所有文件的路径
     :param dirpath: 文件夹路径"""
