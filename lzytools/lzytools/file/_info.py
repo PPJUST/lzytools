@@ -38,6 +38,36 @@ def _get_dir_size(dirpath: str) -> int:
     return _folder_size
 
 
+def _format_bytes_size(bytes_size: int, model: str = 'auto') -> str:
+    """将字节数转换为可读字符串，已选B/KB/MB/GB，保留两位小数
+    :param model: AUTO/GB/MB/KB/B"""
+    # 定义单位和对应的转换系数
+    units = [('GB', 1024 ** 3),
+             ('MB', 1024 ** 2),
+             ('KB', 1024),
+             ('B', 1)
+             ]
+
+    if model.upper() == 'AUTO':
+        # 遍历单位，找到合适的转换单位
+        for unit, factor in units:
+            if bytes_size >= factor:
+                format_size = bytes_size / factor  # 转换为当前单位
+                format_size = round(format_size, 2)  # 保留两位小数
+                format_str = f'{format_size}{unit}'
+                return format_str
+    else:
+        for unit, factor in units:
+            if model.upper() == unit:
+                format_size = bytes_size / factor  # 转换为当前单位
+                format_size = round(format_size, 2)  # 保留两位小数
+                format_str = f'{format_size}{unit}'
+                return format_str
+
+    # 兜底
+    return '0B'
+
+
 def _get_files_in_dir(dirpath: str) -> list:
     """获取文件夹中所有文件的路径
     :param dirpath: 文件夹路径"""
