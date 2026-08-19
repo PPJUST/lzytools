@@ -107,6 +107,14 @@ def _copy_file_to_clipboard(file_path: str):
     subprocess.run(cmd, shell=True, check=True)
 
 
+def _open_parent_and_select(path: str):
+    """打开父目录并选中文件"""
+    # 确保路径是绝对路径，且将反斜杠转为正斜杠或双反斜杠，避免转义问题
+    abs_path = os.path.abspath(path)
+    # 使用 /select 参数
+    subprocess.Popen(f'explorer /select, "{abs_path}"')
+
+
 """----------调用函数----------"""
 
 
@@ -152,3 +160,8 @@ def is_subpath(parent_path: str, child_path: str) -> bool:
 def copy_file_to_clipboard(file_path: str):
     """调用PowerShell命令复制文件到剪切板"""
     return _copy_file_to_clipboard(file_path)
+
+
+def open_parent_and_select(path: str):
+    """打开父目录并选中文件"""
+    return _open_parent_and_select(path)
