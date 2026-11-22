@@ -1,14 +1,13 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Tuple
 
 import natsort
 
 """----------逻辑函数----------"""
 
 
-def _split_path(path: str) -> Tuple[str, str, str]:
+def _split_path(path: str) -> tuple[str, str, str]:
     """拆分路径为父目录路径，文件名（不含文件扩展名），文件扩展名
     :param path: 需要拆分的路径
     :return: 父目录路径，文件名（不含文件扩展名），文件扩展名"""
@@ -29,100 +28,78 @@ def _reverse_path(path: str) -> str:
     :param path: 需要反转的路径
     :return: 反转后的路径
     """
-    path = os.path.normpath(path)
-    path_split = path.split('\\')
-    path_reversed = ' \\ '.join(path_split[::-1])
-    path_reversed = os.path.normpath(path_reversed)
-    return path_reversed
+    normalized = os.path.normpath(path)
+    return os.sep.join(normalized.split(os.sep)[::-1])
 
 
-def _get_parent_dirpaths(path: str) -> list:
+def _get_parent_dirpaths(path: str) -> list[str]:
     """获取传入路径的所有上级目录路径
     :param path: 文件/文件夹路径
     :return: 所有上级目录列表，层级越高，顺序越前"""
-    parent_dirs = []
-
-    while True:
-        parent_dirpath, filename = os.path.split(path)
-        if filename:
-            parent_dirs.append(parent_dirpath)
-        else:
-            break
-
-        path = parent_dirpath
-
-    # 反转列表顺序，使得越上级目录排在越前面
-    parent_dirs = parent_dirs[::-1]
-
-    return parent_dirs
+    parents = Path(os.path.normpath(path)).parents
+    return [os.path.normpath(str(parent)) for parent in reversed(list(parents))]
 
 
 def _get_parent_dirpath(filepath: str, parent_level: int = 1):
     """获取传入路径的第n层父目录
     :param filepath: 文件路径
-    :param parent_level: 父目录层级"""
-    path = Path(filepath)
-    max_index = len(path.parents) - 1
-    if parent_level > max_index:
-        parent_path = path.parents[max_index]  # 超限返回根目录
-    else:
-        parent_path = path.parents[max_index - 1]
-    parent_path = os.path.normpath(str(parent_path))
-    return parent_path
+    :param parent_level: 父目录层级，1 表示直接父目录，超出层级时返回根目录"""
+    parents = list(Path(os.path.normpath(filepath)).parents)
+    if not parents:  # 根目录本身没有上级目录
+        return os.path.normpath(filepath)
+    index = min(max(parent_level, 1), len(parents)) - 1
+    return os.path.normpath(str(parents[index]))
 
 
-def _remove_subpaths(paths: list):
+def _remove_subpaths(paths: list[str]) -> list[str]:
     """剔除传入路径列表中的子路径，仅保留最上级路径"""
-    paths = [os.path.normpath(path) for path in paths]
-    paths = natsort.os_sorted(paths)  # 排序路径
-    subpaths = []
-    for path in paths:
-        paths_split_parents = _get_parent_dirpaths(path)
-        # 判断其父路径是否与原始列表存在交集，如果存在则说明其是子路径
-        _s1 = set(paths)
-        _s2 = set(paths_split_parents)
-        if _s1 & _s2:
-            subpaths.append(path)
+    normalized = [os.path.normpath(path) for path in paths]
+    result: list[str] = []
+    for path in natsort.os_sorted(set(normalized)):
+        # 若已有结果中的某条路径是当前路径的上级，则当前路径为子路径
+        if any(_is_subpath(parent, path)
+               and os.path.normcase(parent) != os.path.normcase(path)
+               for parent in result):
+            continue
+        result.append(path)
 
-    return [i for i in paths if i not in subpaths]
+    return result
 
 
 def _is_subpath(parent_path: str, child_path: str) -> bool:
     """判断一个路径是否为另一个路径的子路径"""
-    # 获取绝对路径并规范化
-    parent = os.path.abspath(os.path.normpath(parent_path))
-    child = os.path.abspath(os.path.normpath(child_path))
+    # 统一大小写后再比较，避免 Windows 下因盘符或目录大小写不一致误判
+    parent = os.path.normcase(os.path.abspath(os.path.normpath(parent_path)))
+    child = os.path.normcase(os.path.abspath(os.path.normpath(child_path)))
 
-    # 比较公共前缀
     try:
-        common_prefix = os.path.commonpath([parent, child])
-        return common_prefix == parent
-    except ValueError:
+        return os.path.commonpath([parent, child]) == parent
+    except ValueError:  # 不同盘符等无法计算公共路径的情况
         return False
 
 
 def _copy_file_to_clipboard(file_path: str):
     """调用PowerShell命令复制文件到剪切板"""
-    cmd = f'powershell "Set-Clipboard -Path \'{file_path}\'"'
-    subprocess.run(cmd, shell=True, check=True)
+    # 以参数列表传递路径，避免路径中的引号、特殊字符导致命令注入或解析失败
+    cmd = ['powershell', '-NoProfile', '-NonInteractive', '-Command',
+           'Set-Clipboard -LiteralPath $args[0]', os.path.abspath(file_path)]
+    _ = subprocess.run(cmd, check=True)
 
 
 def _open_parent_and_select(path: str):
     """打开父目录并选中文件"""
-    # 确保路径是绝对路径，且将反斜杠转为正斜杠或双反斜杠，避免转义问题
     abs_path = os.path.abspath(path)
-    # 使用 /select 参数
-    subprocess.Popen(f'explorer /select, "{abs_path}"')
+    _ = subprocess.Popen(['explorer', '/select,', abs_path])
 
 
 """----------调用函数----------"""
 
 
-def split_path(path: str) -> Tuple[str, str, str]:
+def split_path(path: str) -> tuple[str, str, str]:
     """拆分路径为父目录路径，文件名（不含文件扩展名），文件扩展名
     :param path: 需要拆分的路径
     :return: 父目录路径，文件名（不含文件扩展名），文件扩展名"""
-    return split_path(path)
+    return _split_path(path)
 
 
 def reverse_path(path: str) -> str:
@@ -133,7 +110,7 @@ def reverse_path(path: str) -> str:
     return _reverse_path(path)
 
 
-def get_parent_dirpaths(path: str) -> list:
+def get_parent_dirpaths(path: str) -> list[str]:
     """获取传入路径的所有上级目录路径
     :param path: 文件/文件夹路径
     :return: 所有上级目录列表，层级越高，顺序越前"""
@@ -147,7 +124,7 @@ def get_parent_dirpath(filepath: str, parent_level: int = 1):
     return _get_parent_dirpath(filepath, parent_level)
 
 
-def remove_subpaths(paths: list):
+def remove_subpaths(paths: list[str]) -> list[str]:
     """剔除传入路径列表中的子路径，仅保留最上级路径"""
     return _remove_subpaths(paths)
 

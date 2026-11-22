@@ -1,5 +1,4 @@
 import os
-from typing import Union
 
 import filetype
 import win32com.client  # pywin32
@@ -39,36 +38,22 @@ def _get_dir_size(dirpath: str) -> int:
 
 
 def _format_bytes_size(bytes_size: int, model: str = 'auto') -> str:
-    """将字节数转换为可读字符串，已选B/KB/MB/GB，保留两位小数
+    """将字节数转换为可读字符串，可选B/KB/MB/GB，保留两位小数
     :param model: AUTO/GB/MB/KB/B"""
-    # 定义单位和对应的转换系数
     units = [('GB', 1024 ** 3),
              ('MB', 1024 ** 2),
              ('KB', 1024),
              ('B', 1)
              ]
+    model = model.upper()
+    for unit, factor in units:
+        if (model == 'AUTO' and bytes_size >= factor) or model == unit:
+            return f'{round(bytes_size / factor, 2)}{unit}'
 
-    if model.upper() == 'AUTO':
-        # 遍历单位，找到合适的转换单位
-        for unit, factor in units:
-            if bytes_size >= factor:
-                format_size = bytes_size / factor  # 转换为当前单位
-                format_size = round(format_size, 2)  # 保留两位小数
-                format_str = f'{format_size}{unit}'
-                return format_str
-    else:
-        for unit, factor in units:
-            if model.upper() == unit:
-                format_size = bytes_size / factor  # 转换为当前单位
-                format_size = round(format_size, 2)  # 保留两位小数
-                format_str = f'{format_size}{unit}'
-                return format_str
-
-    # 兜底
     return '0B'
 
 
-def _get_files_in_dir(dirpath: str) -> list:
+def _get_files_in_dir(dirpath: str) -> list[str]:
     """获取文件夹中所有文件的路径
     :param dirpath: 文件夹路径"""
     files = []
@@ -80,7 +65,7 @@ def _get_files_in_dir(dirpath: str) -> list:
     return files
 
 
-def _get_files_in_paths(paths: list) -> list:
+def _get_files_in_paths(paths: list[str]) -> list[str]:
     """提取输入路径列表中所有文件路径"""
     # 删除路径中的子路径
     paths = remove_subpaths(paths)
@@ -91,14 +76,13 @@ def _get_files_in_paths(paths: list) -> list:
         if os.path.isfile(path):
             files.add(path)
         elif os.path.isdir(path):
-            child_files = get_files_in_dir(path)
-            files.update(child_files)
+            files.update(_get_files_in_dir(path))
 
     files = natsort.os_sorted(files)
     return files
 
 
-def _get_folders_in_dir(dirpath: str) -> list:
+def _get_folders_in_dir(dirpath: str) -> list[str]:
     """获取文件夹中所有文件夹的路径
     :param dirpath: 文件夹路径"""
     folders = []
@@ -110,7 +94,7 @@ def _get_folders_in_dir(dirpath: str) -> list:
     return folders
 
 
-def _guess_filetype(path) -> Union[str, None]:
+def _guess_filetype(path) -> str | None:
     """判断文件类型
     :param path: 文件路径"""
     if not os.path.isfile(path):
@@ -158,7 +142,7 @@ def _get_shortcut_target_path(shortcut_path: str) -> str:
         shortcut = shell.CreateShortCut(shortcut_path)
         return shortcut.Targetpath
     except Exception as e:
-        raise f'报错提示：{e}'
+        raise RuntimeError(f'获取快捷方式目标路径失败：{e}') from e
 
 
 """----------调用函数----------"""
@@ -184,24 +168,24 @@ def format_bytes_size(bytes_size: int, model: str = 'auto') -> str:
     return _format_bytes_size(bytes_size, model)
 
 
-def get_files_in_dir(dirpath: str) -> list:
+def get_files_in_dir(dirpath: str) -> list[str]:
     """获取文件夹中所有文件的路径
     :param dirpath: 文件夹路径"""
     return _get_files_in_dir(dirpath)
 
 
-def get_files_in_paths(paths: list) -> list:
+def get_files_in_paths(paths: list[str]) -> list[str]:
     """提取输入路径列表中所有文件路径"""
     return _get_files_in_paths(paths)
 
 
-def get_folders_in_dir(dirpath: str) -> list:
+def get_folders_in_dir(dirpath: str) -> list[str]:
     """获取文件夹中所有文件夹的路径
     :param dirpath: 文件夹路径"""
     return _get_folders_in_dir(dirpath)
 
 
-def guess_filetype(path) -> Union[str, None]:
+def guess_filetype(path) -> str | None:
     """判断文件类型
     :param path: 文件路径"""
     return _guess_filetype(path)
