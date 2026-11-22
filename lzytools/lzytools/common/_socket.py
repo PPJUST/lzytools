@@ -4,30 +4,29 @@ import socket
 """----------逻辑函数----------"""
 
 
-def _send_data_to_socket(data, host: str, port: str):
-    """向本地端口传递数据（使用socket）
-    :param data: 任意类型的数据
-    :param host: str，主机地址
-    :param port: str，端口"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = (host, port)
-    sock.connect(server_address)
+def _send_data_to_socket(data: object, host: str, port: int | str, timeout: float = 5.0) -> None:
+    """向指定主机和端口传递数据（使用 socket）
 
-    try:
-        # 发送数据
-        serialized_data = pickle.dumps(data)  # 用pickle序列化，传递更多类型的数据
-        sock.sendall(serialized_data)
-    finally:
-        # 关闭连接
-        sock.close()
+    :param data: 任意可 pickle 序列化的数据
+    :param host: str，主机地址
+    :param port: int 或 str，端口号
+    :param timeout: float，连接和发送的超时时间（秒）
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(timeout)
+        sock.connect((host, int(port)))
+        sock.sendall(pickle.dumps(data))
 
 
 """----------调用函数----------"""
 
 
-def send_data_to_socket(data, host: str, port: str):
-    """向本地端口传递数据（使用socket）
-    :param data: 任意类型的数据
+def send_data_to_socket(data: object, host: str, port: int | str, timeout: float = 5.0) -> None:
+    """向指定主机和端口传递数据（使用 socket）
+
+    :param data: 任意可 pickle 序列化的数据
     :param host: str，主机地址
-    :param port: str，端口"""
-    _send_data_to_socket(data, host, port)
+    :param port: int 或 str，端口号
+    :param timeout: float，连接和发送的超时时间（秒）
+    """
+    _send_data_to_socket(data, host, port, timeout)

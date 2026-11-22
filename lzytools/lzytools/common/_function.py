@@ -1,69 +1,65 @@
 import inspect
 import time
-from typing import Tuple
 
 """----------逻辑函数----------"""
 
 
-def _get_function_info(mode: str = 'current') -> Tuple[str, str, str]:
+def _get_function_info(mode: str = 'current') -> tuple[str | None, str | None, str | None]:
     """获取当前运行/上个运行的函数的信息
-    :param mode: 'current' 或 'last'
-    :return: 运行时间，函数名，函数文件路径
+    :param mode: 'current'（调用当前函数）或 'last'（调用者的函数）
+    :return: (调用时间, 函数名, 函数文件路径)；模式无效或栈深度不足时返回 (None, None, None)
     """
-    # 获取调用栈
-    stack_trace = inspect.stack()  # stack_trace[0]为当前运行函数，stack_trace[1]为调用当前运行的函数
-
-    # 函数基础信息参数
-    local_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())  # 调用时间
-    function_name = ''  # 函数名
-    caller_path = ''  # 函数文件路径
-
-    # 获取函数信息
-    if mode.lower() == 'current':
-        function_name = stack_trace[1].function
-        caller_path = stack_trace[1].filename
-    elif mode.lower() == 'last':
-        if len(stack_trace) >= 3:
-            function_name = stack_trace[2].function
-            caller_path = stack_trace[2].filename
-
-    if function_name and caller_path:
-        return local_time, function_name, caller_path
-    else:
+    mode_key = mode.lower()
+    if mode_key not in ('current', 'last'):
         return None, None, None
 
+    # inspect.stack() 会遍历整个栈并读取源码上下文，直接访问帧对象更快
+    frame = inspect.currentframe()
+    target = None
+    try:
+        if frame is not None:
+            target = frame.f_back
+            if mode_key == 'last' and target is not None:
+                target = target.f_back
+        if target is None:
+            return None, None, None
+        return time.strftime('%Y-%m-%d %H:%M:%S'), target.f_code.co_name, target.f_code.co_filename
+    finally:
+        # 及时释放帧引用，避免与局部变量形成循环引用
+        del frame, target
 
-def _get_subclasses(cls) -> list:
-    """获取所有子类对象
+
+def _get_subclasses(cls: type) -> list[type]:
+    """获取所有子类对象（深度优先，遍历顺序与递归实现一致）
     :return: 子类对象列表"""
-    subclasses = []
-    for subclass in cls.__subclasses__():
+    subclasses: list[type] = []
+    stack = list(reversed(cls.__subclasses__()))
+    while stack:
+        subclass = stack.pop()
         subclasses.append(subclass)
-        subclasses.extend(_get_subclasses(subclass))
+        stack.extend(reversed(subclass.__subclasses__()))
     return subclasses
 
 
 """----------调用函数----------"""
 
 
-def print_function_info(mode: str = 'current'):
-    """获取当前运行/上个运行的函数的信息
+def print_function_info(mode: str = 'current') -> None:
+    """打印当前运行/上个运行的函数的信息
     :param mode: 'current' 或 'last'
-    :return: 运行时间，函数名，函数文件路径
     """
-    local_time, function_name, caller_path = _get_function_info(mode)
-    print(local_time, function_name, caller_path)
+    print(*_get_function_info(mode))
 
 
-def get_function_info(mode: str = 'current') -> Tuple[str, str, str]:
+def get_function_info(mode: str = 'current') -> tuple[str | None, str | None, str | None]:
     """获取当前运行/上个运行的函数的信息
     :param mode: 'current' 或 'last'
-    :return: 运行时间，函数名，函数文件路径
+    :return: (调用时间, 函数名, 函数文件路径)
     """
     return _get_function_info(mode)
 
 
-def get_subclasses(cls) -> list:
+def get_subclasses(cls: type) -> list[type]:
     """获取所有子类对象
     :return: 子类对象列表"""
     return _get_subclasses(cls)
