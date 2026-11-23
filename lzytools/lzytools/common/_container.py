@@ -1,8 +1,6 @@
 from collections.abc import Hashable, Iterable
 from typing import TypeVar
 
-__all__ = ['dedup_list', 'merge_intersection_item']
-
 _T = TypeVar('_T')
 _H = TypeVar('_H', bound=Hashable)
 
