@@ -1,22 +1,51 @@
-import os.path
+import os
 import re
-from typing import Union
 
-# 分卷压缩包正则
-_PATTERN_7Z = r'^(.+)\.7z\.\d+$'  # test.7z.001/test.7z.002/test.7z.003
-_PATTERN_RAR = r'^(.+)\.part(\d+)\.rar$'  # test.part1.rar/test.part2.rar/test.part3.rar
-_PATTERN_RAR_EXE = r'^(.+)\.part(\d+)\.rar$'  # test.part1.exe/test.part2.exe/test.part3.exe
-_PATTERN_RAR_WITHOUT_SUFFIX = r'^(.+)\.part(\d+)$'  # rar分卷文件无后缀时也能正常解压，test.part1/test.part2/test.part3
-_PATTERN_ZIP = r'^(.+)\.zip$'  # zip分卷文件的第一个分卷包一般都是.zip后缀，所以.zip后缀直接视为分卷压缩文件 test.zip
-_PATTERN_ZIP_VOLUME = r'^(.+)\.z\d+$'  # test.zip/test.z01/test.z02
-_PATTERN_ZIP_TYPE2 = r'^(.+)\.zip\.\d+$'  # test.zip.001/test.zip.002/test.zip.003
-_PATTERN_BZ2 = r'^(.+)\.bz2\.\d+$'  # test.bz2.001/test.bz2.002/test.bz2.003
-_PATTERN_GZ = r'^(.+)\.gz\.\d+$'  # test.gz.001/test.gz.002/test.gz.003
-_PATTERN_TAR = r'^(.+)\.tar\.\d+$'  # test.tar.001/test.tar.002/test.tar.003
-_PATTERN_WIM = r'^(.+)\.wim\.\d+$'  # test.wim.001/test.wim.002/test.wim.003
-_PATTERN_XZ = r'^(.+)\.xz\.\d+$'  # test.xz.001/test.xz.002/test.xz.003
-_PATTERN_JOINED = [_PATTERN_7Z, _PATTERN_RAR, _PATTERN_RAR_WITHOUT_SUFFIX, _PATTERN_ZIP, _PATTERN_ZIP_VOLUME,
-                   _PATTERN_ZIP_TYPE2, _PATTERN_BZ2, _PATTERN_GZ, _PATTERN_TAR, _PATTERN_WIM, _PATTERN_XZ]
+"""----------常量----------"""
+
+# 分卷规则表：(预编译正则, 首卷名后缀)
+#   后缀为空串   -> 首个分卷就是原文件名（test.zip）
+#   后缀含 {n}   -> 该处填入补零后的分卷序号（RAR 系列）
+#   其余         -> 直接拼在文件标题（group 1）之后
+# 统一使用 fullmatch，因此正则中不再需要 ^ / $ 锚点
+_VOLUME_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
+    # test.7z.001 / test.7z.002 / test.7z.003
+    (re.compile(r'(.+)\.7z\.\d+', re.I), '.7z.001'),
+    # test.part1.rar / test.part2.rar / test.part3.rar
+    (re.compile(r'(.+)\.part(\d+)\.rar', re.I), '.part{n}.rar'),
+    # test.part1.exe / test.part2.rar / test.part3.rar（SFX 自解压分卷）
+    (re.compile(r'(.+)\.part(\d+)\.exe', re.I), '.part{n}.exe'),
+    # test.part1 / test.part2 / test.part3（无后缀也能解压）
+    (re.compile(r'(.+)\.part(\d+)', re.I), '.part{n}'),
+    # test.zip（zip 首个分卷通常就是 .zip，直接视为分卷文件）
+    (re.compile(r'(.+)\.zip', re.I), ''),
+    # test.zip / test.z01 / test.z02
+    (re.compile(r'(.+)\.z\d+', re.I), '.zip'),
+    # test.zip.001 / test.zip.002 / test.zip.003
+    (re.compile(r'(.+)\.zip\.\d+', re.I), '.zip.001'),
+    # test.bz2.001 / test.bz2.002 / test.bz2.003
+    (re.compile(r'(.+)\.bz2\.\d+', re.I), '.bz2.001'),
+    # test.gz.001 / test.gz.002 / test.gz.003
+    (re.compile(r'(.+)\.gz\.\d+', re.I), '.gz.001'),
+    # test.tar.001 / test.tar.002 / test.tar.003
+    (re.compile(r'(.+)\.tar\.\d+', re.I), '.tar.001'),
+    # test.wim.001 / test.wim.002 / test.wim.003
+    (re.compile(r'(.+)\.wim\.\d+', re.I), '.wim.001'),
+    # test.xz.001 / test.xz.002 / test.xz.003
+    (re.compile(r'(.+)\.xz\.\d+', re.I), '.xz.001'),
+)
+
+
+def _match_volume(filename: str) -> tuple[re.Match[str], str] | None:
+    """匹配分卷规则，返回 (match, suffix)；未匹配返回 None"""
+    if not filename:
+        return None
+    for pattern, suffix in _VOLUME_RULES:
+        match = pattern.fullmatch(filename)
+        if match:
+            return match, suffix
+    return None
+
 
 """----------逻辑函数----------"""
 
@@ -24,90 +53,33 @@ _PATTERN_JOINED = [_PATTERN_7Z, _PATTERN_RAR, _PATTERN_RAR_WITHOUT_SUFFIX, _PATT
 def _is_volume_archive_by_filename(filename: str) -> bool:
     """通过文件名判断是否为分卷压缩文件
     :param filename: 文件名（包含文件扩展名）"""
-    for pattern in _PATTERN_JOINED:
-        if re.match(pattern, filename, flags=re.I):
-            return True
-
-    return False
+    return _match_volume(filename) is not None
 
 
-def _guess_first_volume_archive_filename(filename: str) -> Union[str, None]:
+def _guess_first_volume_archive_filename(filename: str) -> str | None:
     """根据传入的文件名，生成分卷压缩文件的首个分卷包文件名
     :param filename: 文件名（包含文件扩展名）
-    :return: 生成的首个分卷包文件名，未生成时返回None"""
-    if not _is_volume_archive_by_filename(filename):
+    :return: 生成的首个分卷包文件名，未生成时返回 None"""
+    matched = _match_volume(filename)
+    if matched is None:
         return None
 
-    guess_filename = False
-
-    # test.7z.001/test.7z.002/test.7z.003
-    if re.match(_PATTERN_7Z, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_7Z, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.7z.001'
-    # test.part1.rar/test.part2.rar/test.part3.rar
-    elif re.match(_PATTERN_RAR, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_RAR, filename, flags=re.I).group(1)
-        number_length = len(re.match(_PATTERN_RAR, filename, flags=re.I).group(2))  # 处理part1.rar和part01.rar的情况
-        guess_filename = f'{filetitle}.part{"1".zfill(number_length)}.rar'
-    # test.part1.exe/test.part2.exe/test.part3.exe
-    elif re.match(_PATTERN_RAR_EXE, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_RAR_EXE, filename, flags=re.I).group(1)
-        number_length = len(re.match(_PATTERN_RAR_EXE, filename, flags=re.I).group(2))  # 处理part1.rar和part01.rar的情况
-        guess_filename = f'{filetitle}.part{"1".zfill(number_length)}.exe'
-    # test.part1/test.part2/test.part3
-    elif re.match(_PATTERN_RAR_WITHOUT_SUFFIX, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_RAR_WITHOUT_SUFFIX, filename, flags=re.I).group(1)
-        number_length = len(re.match(_PATTERN_RAR_WITHOUT_SUFFIX, filename, flags=re.I).group(2))
-        guess_filename = f'{filetitle}.part{"1".zfill(number_length)}'
-    # test.zip
-    elif re.match(_PATTERN_ZIP, filename, flags=re.I):
-        guess_filename = filename
-    # test.zip/test.z01/test.z02
-    elif re.match(_PATTERN_ZIP_VOLUME, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_ZIP_VOLUME, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.zip'
-    # test.zip.001/test.zip.002/test.zip.003
-    elif re.match(_PATTERN_ZIP_TYPE2, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_ZIP_TYPE2, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.zip.001'
-    # test.bz2.001/test.bz2.002/test.bz2.003
-    elif re.match(_PATTERN_BZ2, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_BZ2, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.bz2.001'
-    # test.gz.001/test.gz.002/test.gz.003
-    elif re.match(_PATTERN_GZ, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_GZ, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.gz.001'
-    # test.tar.001/test.tar.002/test.tar.003
-    elif re.match(_PATTERN_TAR, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_TAR, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.tar.001'
-    # test.wim.001/test.wim.002/test.wim.003
-    elif re.match(_PATTERN_WIM, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_WIM, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.wim.001'
-    # test.xz.001/test.xz.002/test.xz.003
-    elif re.match(_PATTERN_XZ, filename, flags=re.I):
-        filetitle = re.match(_PATTERN_XZ, filename, flags=re.I).group(1)
-        guess_filename = f'{filetitle}.xz.001'
-
-    return guess_filename
+    match, suffix = matched
+    if not suffix:
+        return match.group(0)
+    if '{n}' in suffix:
+        suffix = suffix.replace('{n}', '1'.zfill(len(match.group(2))))
+    return match.group(1) + suffix
 
 
 def _get_filetitle(filename: str) -> str:
     """剔除文件名中的压缩文件扩展名
     :param filename: 文件名（包含文件扩展名）
     :return: 压缩文件扩展名的文件标题"""
-    if not _is_volume_archive_by_filename(filename):
-        return os.path.splitext(filename)[0]
-
-    for pattern in _PATTERN_JOINED:
-        if re.match(pattern, filename, flags=re.I):
-            filetitle = re.match(pattern, filename, flags=re.I).group(1)
-            if filetitle:
-                return filetitle
-
-    return os.path.basename(filename)  # 兜底
+    matched = _match_volume(filename)
+    if matched is not None:
+        return matched[0].group(1)
+    return os.path.basename(filename)
 
 
 """----------调用函数----------"""
@@ -119,10 +91,10 @@ def is_volume_archive_by_filename(filename: str) -> bool:
     return _is_volume_archive_by_filename(filename)
 
 
-def guess_first_volume_archive_filename(filename: str) -> Union[str, None]:
+def guess_first_volume_archive_filename(filename: str) -> str | None:
     """根据传入的文件名，生成分卷压缩文件的首个分卷包文件名
     :param filename: 文件名（包含文件扩展名）
-    :return: 生成的首个分卷包文件名，未生成时返回None"""
+    :return: 生成的首个分卷包文件名，未生成时返回 None"""
     return _guess_first_volume_archive_filename(filename)
 
 
