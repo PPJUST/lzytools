@@ -1,3 +1,5 @@
+from PIL import ImageFile
+
 from ._check import *
 from ._convert import *
 from ._hash import *

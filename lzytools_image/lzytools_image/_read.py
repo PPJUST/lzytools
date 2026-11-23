@@ -1,61 +1,62 @@
-import os
-from typing import Union
-
 import cv2
 import numpy
 
 """----------逻辑函数----------"""
 
 
-def _read_local_image_to_numpy(image_path: str) -> Union[numpy.ndarray, None]:
-    """读取本地图片，返回numpy对象
+def _read_local_image_to_bytes(image_path: str) -> bytes | None:
+    """读取本地图片，返回 bytes 图片对象。
     :param image_path: 本地图片路径
-    :return: numpy对象"""
-    if os.path.exists(image_path):
-        image_numpy = cv2.imdecode(numpy.fromfile(image_path, dtype=numpy.uint8), -1)
-        return image_numpy
-    else:
+    :return: bytes 图片对象，文件不存在或不可读时返回 None
+    """
+    try:
+        with open(image_path, 'rb') as image_file:
+            return image_file.read()
+    except OSError:
         return None
 
 
-def _read_local_image_to_bytes(image_path: str) -> Union[bytes, None]:
-    """读取本地图片，返回bytes对象
+def _read_local_image_to_numpy(image_path: str) -> numpy.ndarray | None:
+    """读取本地图片，返回 numpy 图片对象（保留 alpha 通道）。
     :param image_path: 本地图片路径
-    :return: bytes对象"""
-    if os.path.exists(image_path):
-        with open(image_path, 'rb') as file:
-            image_bytes = file.read()
-            return image_bytes
-    else:
+    :return: numpy 图片对象，文件不存在、不可读或无法解码时返回 None
+    """
+    image_bytes = _read_local_image_to_bytes(image_path)
+    if not image_bytes:
         return None
+    return cv2.imdecode(numpy.frombuffer(image_bytes, dtype=numpy.uint8), -1)
 
 
 """----------调用函数----------"""
 
 
-def read_local_image_to_numpy(image_path: str) -> Union[numpy.ndarray, None]:
-    """读取本地图片，返回numpy对象
+def read_local_image_to_numpy(image_path: str) -> numpy.ndarray | None:
+    """读取本地图片，返回 numpy 图片对象（保留 alpha 通道）。
     :param image_path: 本地图片路径
-    :return: numpy对象"""
+    :return: numpy 图片对象，文件不存在、不可读或无法解码时返回 None
+    """
     return _read_local_image_to_numpy(image_path)
 
 
-def read_image_to_numpy(image_path: str) -> Union[numpy.ndarray, None]:
-    """读取本地图片，返回numpy对象
+def read_image_to_numpy(image_path: str) -> numpy.ndarray | None:
+    """读取本地图片，返回 numpy 图片对象（保留 alpha 通道）。
     :param image_path: 本地图片路径
-    :return: numpy对象"""
+    :return: numpy 图片对象，文件不存在、不可读或无法解码时返回 None
+    """
     return _read_local_image_to_numpy(image_path)
 
 
-def read_local_image_to_bytes(image_path: str) -> Union[bytes, None]:
-    """读取本地图片，返回bytes对象
+def read_local_image_to_bytes(image_path: str) -> bytes | None:
+    """读取本地图片，返回 bytes 图片对象。
     :param image_path: 本地图片路径
-    :return: bytes对象"""
+    :return: bytes 图片对象，文件不存在或不可读时返回 None
+    """
     return _read_local_image_to_bytes(image_path)
 
 
-def read_image_to_bytes(image_path: str) -> Union[bytes, None]:
-    """读取本地图片，返回bytes对象
+def read_image_to_bytes(image_path: str) -> bytes | None:
+    """读取本地图片，返回 bytes 图片对象。
     :param image_path: 本地图片路径
-    :return: bytes对象"""
+    :return: bytes 图片对象，文件不存在或不可读时返回 None
+    """
     return _read_local_image_to_bytes(image_path)
