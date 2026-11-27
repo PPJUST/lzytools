@@ -1,82 +1,80 @@
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtCore import QPoint, QRect, QSize, Qt, Signal
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QDialog, QRubberBand, QVBoxLayout, QWidget
 
 
 class DialogScreenRegionSelect(QDialog):
-    """框选屏幕区域的Dialog"""
-    SelectedRegion = Signal(int, int, int, int, name='左上角x轴坐标，左上角y轴坐标，宽度，高度')
+    """框选屏幕区域的 Dialog"""
+    SelectedRegion = Signal(int, int, int, int)
 
-    def __init__(self):
-        super().__init__()
-        # 设置无边框
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        # 设置置顶
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
-        # 设置为全屏大小
-        screen_geometry = QGuiApplication.primaryScreen().size()
-        screen_width = screen_geometry.width()
-        screen_height = screen_geometry.height()
-        self.setGeometry(0, 0, screen_width, screen_height)
-        # 设置半透明
-        self.setWindowOpacity(0.5)  # 0~1，0为完全透明
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(
+            self.windowFlags()
+            | Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+        )
 
-        # 添加框选控件
+        screen_size = QGuiApplication.primaryScreen().size()
+        self.setGeometry(0, 0, screen_size.width(), screen_size.height())
+        self.setWindowOpacity(0.5)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        widget = _WidgetScreenRegionSelect()
+        widget = _WidgetScreenRegionSelect(self)
         widget.SelectedRegion.connect(self.select_region)
         widget.rightClick.connect(self.close)
         layout.addWidget(widget)
 
     def select_region(self, rect: QRect):
-        # 去除遮罩
-        self.setWindowOpacity(0)  # 0~1，0为完全透明
-
-        # 提取框选区域
-        x = rect.x()
-        y = rect.y()
-        width = rect.width()
-        height = rect.height()
-
-        self.SelectedRegion.emit(x, y, width, height)
-
+        """接收框选区域并发射四元组信号"""
+        self.setWindowOpacity(0)
+        self.SelectedRegion.emit(rect.x(), rect.y(), rect.width(), rect.height())
         self.close()
 
 
 class _WidgetScreenRegionSelect(QWidget):
     """框选控件"""
-    SelectedRegion = Signal(QRect)  # 发送截取区域QRect
-    rightClick = Signal()  # 右键信号
+    SelectedRegion = Signal(QRect)
+    rightClick = Signal()
 
-    def __init__(self):
-        super().__init__()
-        # 初始化变量
-        self.startPoint = None  # 截取起始点
-        self.endPoint = None  # 截取终止点
-        self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)  # 橡皮筋控件（蚂蚁线）
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.startPoint = None
+        self.endPoint = None
+        self.rubberBand = QRubberBand(QRubberBand.Shape.Rectangle, self)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:  # 左键
-            self.startPoint = event.pos()
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.startPoint = event.position().toPoint()
+            self.endPoint = QPoint(self.startPoint)
             self.rubberBand.setGeometry(QRect(self.startPoint, QSize()))
             self.rubberBand.show()
-        elif event.button() == Qt.RightButton:  # 右键
+        elif event.button() == Qt.MouseButton.RightButton:
             self.rightClick.emit()
+        super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self.startPoint:
-            self.endPoint = event.pos()
-            self.rubberBand.setGeometry(QRect(self.startPoint, self.endPoint).normalized())
+        if self.startPoint is not None:
+            self.endPoint = event.position().toPoint()
+            self.rubberBand.setGeometry(
+                QRect(self.startPoint, self.endPoint).normalized()
+            )
+        super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton and self.startPoint:
-            self.endPoint = event.pos()
+        if event.button() == Qt.MouseButton.LeftButton and self.startPoint is not None:
+            self.endPoint = event.position().toPoint()
             self.rubberBand.hide()
-            self.take_select_area()  # 获取截取区域
+            self.take_select_area()
+        super().mouseReleaseEvent(event)
 
     def take_select_area(self):
         """获取框选区域"""
+        if self.startPoint is None or self.endPoint is None:
+            return
         rect = QRect(self.startPoint, self.endPoint).normalized()
         self.SelectedRegion.emit(rect)
+        self.startPoint = None
+        self.endPoint = None

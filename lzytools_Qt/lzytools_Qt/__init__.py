@@ -1,3 +1,5 @@
+"""lzytools_Qt：PySide6 自用 Qt 组件库。"""
+
 from ._button import *
 from ._dialog import *
 from ._label import *
